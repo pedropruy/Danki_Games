@@ -15,8 +15,9 @@ import com.peperonistudios.main.Game;
 
 public class World {
 	
-	private  Tile[] tiles;
+	public static Tile[] tiles;
 	public static int WIDTH, HEIGHT;
+    public static final int TILE_SIZE = 16;
 	
 	public World(String path) {
 		try {
@@ -38,13 +39,13 @@ public class World {
                 tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_GRASS);
                 break;
             case 0xFF7F3300:
-                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_SOLOTREE);
+                tiles[xx + (yy * WIDTH)] = new WallTile(xx * 16, yy * 16, Tile.TILE_SOLOTREE);
                 break;
             case 0xFF00AD00:
-                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_TREETOP);
+                tiles[xx + (yy * WIDTH)] = new WallTile(xx * 16, yy * 16, Tile.TILE_TREETOP);
                 break;
             case 0xFF00FFFF:
-                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_RIVER);
+                tiles[xx + (yy * WIDTH)] = new WallTile(xx * 16, yy * 16, Tile.TILE_RIVER);
                 break;
             case 0xFFFF9854:
                 tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_BRIDGEV);
@@ -53,7 +54,7 @@ public class World {
                 tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_BRIDGEH);
                 break;
             case 0xFFAD7B00:
-                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_FENCE);
+                tiles[xx + (yy * WIDTH)] = new WallTile(xx * 16, yy * 16, Tile.TILE_FENCE);
                 break;
             case 0xFFFF006E:
                 tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_FLOWER);
@@ -81,7 +82,7 @@ public class World {
                 break;
             default:
         		// Por padrão, sempre criamos o tile do chão
-        		tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_GRASS);
+        		tiles[xx + (yy * WIDTH)] = new WallTile(xx * 16, yy * 16, Tile.TILE_GRASS);
                 break;
         }
     }
@@ -90,6 +91,29 @@ public class World {
 			e.printStackTrace();
 		}
 	}
+
+    public static boolean isFree(int xnext, int ynext) {
+        int pxl_a_menos = 2;
+        // Cantos superiores
+        int x1 = (xnext+pxl_a_menos) / TILE_SIZE;
+        int y1 = (ynext+pxl_a_menos) / TILE_SIZE;
+
+        int x2 = (xnext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
+        int y2 = (ynext+pxl_a_menos) / TILE_SIZE;
+
+        // Cantos inferiores
+        int x3 = (xnext+pxl_a_menos) / TILE_SIZE;
+        int y3 = (ynext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
+
+        int x4 = (xnext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
+        int y4 = (ynext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
+
+        return !((tiles[x1 + (y1*World.WIDTH)] instanceof WallTile) ||
+                 (tiles[x2 + (y2*World.WIDTH)] instanceof WallTile) ||
+                 (tiles[x3 + (y3*World.WIDTH)] instanceof WallTile) ||
+                 (tiles[x4 + (y4*World.WIDTH)] instanceof WallTile));
+
+    }
 
 	public void render(Graphics g) {
 		int xstart = Camera.x >> 4;
