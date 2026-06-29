@@ -1,0 +1,117 @@
+package com.peperonistudios.world;
+
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
+import com.peperonistudios.entities.Enemy;
+import com.peperonistudios.entities.Entity;
+import com.peperonistudios.entities.LifeElixir;
+import com.peperonistudios.entities.ManaElixir;
+import com.peperonistudios.entities.Weapon;
+import com.peperonistudios.main.Game;
+
+public class World {
+	
+	private  Tile[] tiles;
+	public static int WIDTH, HEIGHT;
+	
+	public World(String path) {
+		try {
+			BufferedImage map = ImageIO.read(getClass().getResource(path));
+			int[] pixels = new int[map.getWidth() * map.getHeight()];
+			tiles = new Tile[map.getWidth() * map.getHeight()];
+			WIDTH = map.getWidth();
+			HEIGHT = map.getHeight();
+			map.getRGB(0, 0,map.getWidth(), map.getHeight(), pixels, 0, map.getWidth());
+			for(int xx = 0; xx < map.getWidth(); xx++) {
+    for(int yy = 0; yy < map.getHeight(); yy++) {
+        int pixelAtual = pixels[xx + (yy * map.getWidth())];
+
+    	// Por padrão, sempre criamos o tile do chão
+        tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_GRASS);
+
+        switch(pixelAtual) {
+            case 0xFF00FF21:
+                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_GRASS);
+                break;
+            case 0xFF7F3300:
+                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_SOLOTREE);
+                break;
+            case 0xFF00AD00:
+                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_TREETOP);
+                break;
+            case 0xFF00FFFF:
+                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_RIVER);
+                break;
+            case 0xFFFF9854:
+                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_BRIDGEV);
+                break;
+            case 0xFFF76200:
+                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_BRIDGEH);
+                break;
+            case 0xFFAD7B00:
+                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_FENCE);
+                break;
+            case 0xFFFF006E:
+                tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_FLOWER);
+                break;
+            case 0xFF57007F:
+                // PLAYER
+                Game.player.setX(xx * 16);
+                Game.player.setY(yy * 16);
+                break;
+            case 0xFFB200FF:
+                // PURPLE SLIME
+                Game.entities.add(new Enemy(xx * 16, yy * 16, 16, 16, Entity.PURP_SLIME_EN));
+                break;
+            case 0xFF007F0E:
+                // HEALTH ELIXIR
+                Game.entities.add(new LifeElixir(xx * 16, yy * 16, 16, 16, Entity.LIFE_ELIXIR_EN));
+                break;
+            case 0xFF007F7F:
+                // MANA ELIXIR
+                Game.entities.add(new ManaElixir(xx * 16, yy * 16, 16, 16, Entity.MANA_ELIXIR_EN));
+                break;
+            case 0xFFFF0000:
+                // FIRE MAGIC BOOK
+                Game.entities.add(new Weapon(xx * 16, yy * 16, 16, 16, Entity.FIRE_BOOK_EN));
+                break;
+            default:
+        		// Por padrão, sempre criamos o tile do chão
+        		tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_GRASS);
+                break;
+        }
+    }
+}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void render(Graphics g) {
+		int xstart = Camera.x >> 4;
+		int ystart = Camera.y >> 4;
+
+		int xfinal = xstart + (Game.WIDTH >> 4) + 1;
+		int yfinal = ystart + (Game.HEIGHT >> 4) + 1;
+
+		/*if (xstart < 0) xstart = 0;
+   		if (ystart < 0) ystart = 0;
+
+    	// Impede que passemos do tamanho máximo do mapa (neste caso, usando as variáveis do próprio mapa)
+    	if (xfinal >= WIDTH) xfinal = WIDTH - 1;
+    	if (yfinal >= HEIGHT) yfinal = HEIGHT - 1;*/
+
+		for (int xx = xstart; xx <= xfinal; xx++) {
+			for (int yy = ystart; yy <= yfinal; yy++) {
+				if(xx < 0 || yy < 0 || xx >= WIDTH || yy >= HEIGHT)
+					continue;
+				Tile tile = tiles[xx + (yy*WIDTH)];
+				tile.render(g);
+			}
+		}
+	}
+}
