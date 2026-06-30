@@ -2,9 +2,9 @@ package com.peperonistudios.entities;
 
 import java.awt.image.BufferedImage;
 
-public class Weapon extends Entity{
+public class Spell extends Entity{
 
-	public Weapon(int x, int y, int width, int height, BufferedImage sprite) {
+	public Spell(int x, int y, int width, int height, BufferedImage sprite) {
 		super(x, y, width, height, sprite);
 	}
 

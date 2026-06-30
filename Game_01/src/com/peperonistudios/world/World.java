@@ -10,7 +10,7 @@ import com.peperonistudios.entities.Enemy;
 import com.peperonistudios.entities.Entity;
 import com.peperonistudios.entities.LifeElixir;
 import com.peperonistudios.entities.ManaElixir;
-import com.peperonistudios.entities.Weapon;
+import com.peperonistudios.entities.Spell;
 import com.peperonistudios.main.Game;
 
 public class World {
@@ -66,7 +66,9 @@ public class World {
                 break;
             case 0xFFB200FF:
                 // PURPLE SLIME
-                Game.entities.add(new Enemy(xx * 16, yy * 16, 16, 16, Entity.PURP_SLIME_EN));
+                Enemy en = new Enemy(xx * 16, yy * 16, 16, 16, Entity.PURP_SLIME_EN);
+                Game.entities.add(en);
+                Game.enemies.add(en);
                 break;
             case 0xFF007F0E:
                 // HEALTH ELIXIR
@@ -78,7 +80,7 @@ public class World {
                 break;
             case 0xFFFF0000:
                 // FIRE MAGIC BOOK
-                Game.entities.add(new Weapon(xx * 16, yy * 16, 16, 16, Entity.FIRE_BOOK_EN));
+                Game.entities.add(new Spell(xx * 16, yy * 16, 16, 16, Entity.FIRE_BOOK_EN));
                 break;
             default:
         		// Por padrão, sempre criamos o tile do chão

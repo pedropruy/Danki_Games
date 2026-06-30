@@ -57,7 +57,7 @@ public class Player extends Entity{
 			x-=spd;
 		}
 		
-		if(up && World.isFree(this.getX(),(int)(y - spd))) {
+		else if(up && World.isFree(this.getX(),(int)(y - spd))) {
 			moved = true;
 			dir = up_dir;
 			y-=spd;
