@@ -17,6 +17,7 @@ public class Creature extends Entity{
 	protected BufferedImage[] leftCreature;
 	protected BufferedImage[] upCreature;
 	protected BufferedImage[] downCreature;
+    protected int offsetShadow = 0;
 
     public boolean isDamaged = false;
 	protected int isDamagedFrames = 0;
@@ -29,7 +30,7 @@ public class Creature extends Entity{
     }
     
     public void render(Graphics2D g2d) {
-        g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y, null);
+        g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + offsetShadow, null);
 
 		// Descobre qual é a sprite atual com base na direção
     	BufferedImage spriteAtual = null;

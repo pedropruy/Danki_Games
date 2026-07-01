@@ -25,6 +25,8 @@ public class Player extends Creature {
 	
 	public Player(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
+
+		this.offsetShadow = 2;
 		
 		rightCreature = new BufferedImage[2];
 		leftCreature = new BufferedImage[2];

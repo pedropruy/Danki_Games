@@ -110,6 +110,7 @@ public class Enemy extends Creature {
 		isCollidingWithProjectiles();
 
 		} else {
+			// Animação de morte simples
 			this.isDamagedFrames++;
     
     		// Altera o estado a cada 4 frames (Sinta-se livre para mudar o 4 para alterar a velocidade do piscar)
@@ -170,5 +171,6 @@ public class Enemy extends Creature {
 	}
 
 	public void render(Graphics2D g2d) {
+		super.render(g2d);
 	}
 }
