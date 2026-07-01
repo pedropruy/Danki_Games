@@ -5,6 +5,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.peperonistudios.main.Game;
+import com.peperonistudios.main.Sound;
 import com.peperonistudios.world.World;
 
 public class Enemy extends Creature {
@@ -40,25 +41,25 @@ public class Enemy extends Creature {
 		if (this.life > 0) {
 		if (this.isCollidingWithPlayer() == false) {
 		if (Game.rand.nextInt(100) < 30 && !this.isDamaged) {
-			if ((int)x < Game.player.getX() && World.isFree((int)(x+speed), this.getY())
+			if ((int)x < Game.player.getX() && World.isFreeCreature((int)(x+speed), this.getY())
 				&& !isColliding((int)(x+speed), this.getY())) {
 				moved = true;
 				dir = right_dir;
 				x += speed;
 			}
-			else if ((int)x > Game.player.getX() && World.isFree((int)(x-speed), this.getY())
+			else if ((int)x > Game.player.getX() && World.isFreeCreature((int)(x-speed), this.getY())
 					&& !isColliding((int)(x-speed), this.getY())) {
 				moved = true;
 				dir = left_dir;
 				x -= speed;
 			}
-			else if ((int)y < Game.player.getY() && World.isFree(this.getX(), (int)(y+speed))
+			else if ((int)y < Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y+speed))
 					&& !isColliding(this.getX(), (int)(y+speed))) {
 				moved = true;
 				dir = down_dir;
 				y += speed;
 			}
-			else if ((int)y > Game.player.getY() && World.isFree(this.getX(), (int)(y-speed))
+			else if ((int)y > Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y-speed))
 					&& !isColliding(this.getX(), (int)(y-speed))) {
 				moved = true;
 				dir = up_dir;
@@ -69,6 +70,7 @@ public class Enemy extends Creature {
 			// Estamos colidindo com o player
 			if(!Game.player.isDamaged) {
 				if (Game.rand.nextInt(100) < 10) {
+					Sound.hurtEffect.play();
 					Game.player.isDamaged = true;
 					Player.life--;
 				}
@@ -156,6 +158,7 @@ public class Enemy extends Creature {
 			Projectile e = Game.projectiles.get(i);
 			
 			if (Entity.isColliding(this, e) && !isDamaged) {
+				Sound.hurtEffect.play();
 				life -= e.damage;
 				this.isDamaged = true;
 				Game.projectiles.remove(e);
@@ -165,7 +168,7 @@ public class Enemy extends Creature {
 		return false;
 	}
 
-	public void destroySelf () {
+	protected void destroySelf () {
 		Game.enemies.remove(this);
 		Game.entities.remove(this);
 	}

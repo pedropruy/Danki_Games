@@ -3,14 +3,19 @@ package com.peperonistudios.world;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
+import com.peperonistudios.entities.Collectable;
 import com.peperonistudios.entities.Enemy;
 import com.peperonistudios.entities.Entity;
 import com.peperonistudios.entities.LifeElixir;
 import com.peperonistudios.entities.ManaElixir;
+import com.peperonistudios.entities.Player;
+import com.peperonistudios.entities.Projectile;
 import com.peperonistudios.entities.SpellBook;
+import com.peperonistudios.graficos.Spritesheet;
 import com.peperonistudios.main.Game;
 
 public class World {
@@ -45,7 +50,7 @@ public class World {
                 tiles[xx + (yy * WIDTH)] = new WallTile(xx * 16, yy * 16, Tile.TILE_TREETOP);
                 break;
             case 0xFF00FFFF:
-                tiles[xx + (yy * WIDTH)] = new WallTile(xx * 16, yy * 16, Tile.TILE_RIVER);
+                tiles[xx + (yy * WIDTH)] = new ObstacleTile(xx * 16, yy * 16, Tile.TILE_RIVER);
                 break;
             case 0xFFFF9854:
                 tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_BRIDGEV);
@@ -113,7 +118,33 @@ public class World {
 		}
 	}
 
-    public static boolean isFree(int xnext, int ynext) {
+    public static boolean isFreeCreature(int xnext, int ynext) {
+        int pxl_a_menos = 2;
+        // Cantos superiores
+        int x1 = (xnext+pxl_a_menos) / TILE_SIZE;
+        int y1 = (ynext+pxl_a_menos) / TILE_SIZE;
+
+        int x2 = (xnext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
+        int y2 = (ynext+pxl_a_menos) / TILE_SIZE;
+
+        // Cantos inferiores
+        int x3 = (xnext+pxl_a_menos) / TILE_SIZE;
+        int y3 = (ynext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
+
+        int x4 = (xnext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
+        int y4 = (ynext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
+
+        return !((tiles[x1 + (y1*World.WIDTH)] instanceof WallTile) ||
+                 (tiles[x2 + (y2*World.WIDTH)] instanceof WallTile) ||
+                 (tiles[x3 + (y3*World.WIDTH)] instanceof WallTile) ||
+                 (tiles[x4 + (y4*World.WIDTH)] instanceof WallTile)) &&
+               !((tiles[x1 + (y1*World.WIDTH)] instanceof ObstacleTile) ||
+                 (tiles[x2 + (y2*World.WIDTH)] instanceof ObstacleTile) ||
+                 (tiles[x3 + (y3*World.WIDTH)] instanceof ObstacleTile) ||
+                 (tiles[x4 + (y4*World.WIDTH)] instanceof ObstacleTile));
+    }
+
+    public static boolean isFreeProjectile(int xnext, int ynext) {
         int pxl_a_menos = 2;
         // Cantos superiores
         int x1 = (xnext+pxl_a_menos) / TILE_SIZE;
@@ -133,8 +164,24 @@ public class World {
                  (tiles[x2 + (y2*World.WIDTH)] instanceof WallTile) ||
                  (tiles[x3 + (y3*World.WIDTH)] instanceof WallTile) ||
                  (tiles[x4 + (y4*World.WIDTH)] instanceof WallTile));
-
     }
+
+    public static void restartGame (String level) {
+		Game.entities.clear();
+		Game.enemies.clear();
+		Game.collectables.clear();
+		Game.projectiles.clear();
+		Game.entities = new ArrayList<Entity>();
+		Game.enemies = new ArrayList<Enemy>();
+		Game.collectables = new ArrayList<Collectable>();
+		Game.projectiles = new ArrayList<Projectile>();
+		Game.spritesheet = new Spritesheet("/spritesheet.png");
+		Game.player = new Player(0,0,16,16,Game.spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
+		// Possivelmente um resetPlayer aqui!
+        Player.life = Player.max_life; Player.mana = 0; 
+		Game.entities.add(Game.player);
+		Game.world = new World("/" + level);
+	}
 
 	public void render(Graphics2D g2d) {
 		int xstart = Camera.x >> 4;

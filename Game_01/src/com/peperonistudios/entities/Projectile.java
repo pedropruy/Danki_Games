@@ -42,7 +42,7 @@ public class Projectile extends Entity{
         x += dx * speed;
         y += dy * speed;
 
-        if(!World.isFree((int)x, (int)y)) {
+        if(!World.isFreeProjectile((int)x, (int)y)) {
             Game.projectiles.remove(this);
         }
 

@@ -3,6 +3,7 @@ package com.peperonistudios.entities;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import com.peperonistudios.main.Game;
 import com.peperonistudios.world.Camera;
 
 public class Creature extends Entity{
@@ -28,6 +29,9 @@ public class Creature extends Entity{
             int maskh) {
         super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
     }
+
+	protected void destroySelf () {
+	}
     
     public void render(Graphics2D g2d) {
         g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + offsetShadow, null);
@@ -55,7 +59,6 @@ public class Creature extends Entity{
     	    } else if (this.damageMode == 2) {
         	    // Não desenha nada (totalmente transparente)
         	} else {
-            	// Desenha normal
             	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
         	}
 	    } else {

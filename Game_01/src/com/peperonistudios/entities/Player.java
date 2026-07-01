@@ -49,23 +49,23 @@ public class Player extends Creature {
 
 	public void tick() {
 		moved = false;
-		if(right && World.isFree((int)(x + speed),this.getY())) {
+		if(right && World.isFreeCreature((int)(x + speed),this.getY())) {
 			moved = true;
 			dir = right_dir;
 			x+=speed;
 		}
-		else if (left && World.isFree((int)(x - speed),this.getY())) {
+		else if (left && World.isFreeCreature((int)(x - speed),this.getY())) {
 			moved = true;
 			dir = left_dir;
 			x-=speed;
 		}
 		
-		else if(up && World.isFree(this.getX(),(int)(y - speed))) {
+		else if(up && World.isFreeCreature(this.getX(),(int)(y - speed))) {
 			moved = true;
 			dir = up_dir;
 			y-=speed;
 		}
-		else if (down && World.isFree(this.getX(),(int)(y + speed))) {
+		else if (down && World.isFreeCreature(this.getX(),(int)(y + speed))) {
 			moved = true;
 			dir = down_dir;
 			y+=speed;
@@ -119,20 +119,10 @@ public class Player extends Creature {
 
 		// Game over simples!
 		if (life <= 0) {
-			Game.entities.clear();
-			Game.enemies.clear();
-			Game.collectables.clear();
-			Game.projectiles.clear();
-			Game.entities = new ArrayList<Entity>();
-			Game.enemies = new ArrayList<Enemy>();
-			Game.collectables = new ArrayList<Collectable>();
-			Game.projectiles = new ArrayList<Projectile>();
-			Game.spritesheet = new Spritesheet("/spritesheet.png");
-			Game.player = new Player(0,0,16,16,Game.spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
-			Player.life = max_life; Player.mana = max_mana;
-			Game.entities.add(Game.player);
-			Game.world = new World("/map.png");
-			return;
+			life = 0;
+			Game.gameState = "GameOver";
+			//destroySelf();
+			//return;
 		}
 
 		checkCollisionItems();
@@ -257,6 +247,23 @@ public class Player extends Creature {
 		}
 	}
 	
+	protected void destroySelf () {
+		Game.entities.clear();
+		Game.enemies.clear();
+		Game.collectables.clear();
+		Game.projectiles.clear();
+		Game.entities = new ArrayList<Entity>();
+		Game.enemies = new ArrayList<Enemy>();
+		Game.collectables = new ArrayList<Collectable>();
+		Game.projectiles = new ArrayList<Projectile>();
+		Game.spritesheet = new Spritesheet("/spritesheet.png");
+		Game.player = new Player(0,0,16,16,Game.spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
+		// Possivelmente um resetPlayer aqui!
+		Player.life = max_life; Player.mana = 0;
+		Game.entities.add(Game.player);
+		Game.world = new World("/level1.png");
+	}
+
 	public void render(Graphics2D g2d) {
 		super.render(g2d);
 
