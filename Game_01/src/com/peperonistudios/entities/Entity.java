@@ -1,12 +1,10 @@
 package com.peperonistudios.entities;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.peperonistudios.main.Game;
-import com.peperonistudios.world.Camera;
 
 public class Entity {
 

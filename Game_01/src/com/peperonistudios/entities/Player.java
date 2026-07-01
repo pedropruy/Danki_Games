@@ -9,24 +9,9 @@ import com.peperonistudios.main.Game;
 import com.peperonistudios.world.Camera;
 import com.peperonistudios.world.World;
 
-public class Player extends Entity{
+public class Player extends Creature {
 	
 	public boolean right, up, down, left;
-	public int right_dir = 0, left_dir = 1, up_dir = 2, down_dir = 3;
-	public int dir = down_dir;
-	public double spd = 1;
-
-	private int frames = 0, maxFrames = 15, index = 0, maxIndex = 1;
-	private boolean moved = false;
-	private BufferedImage[] rightPlayer;
-	private BufferedImage[] leftPlayer;
-	private BufferedImage[] upPlayer;
-	private BufferedImage[] downPlayer;
-
-	public boolean isDamaged = false;
-	private int isDamagedFrames = 0;
-	// 0 = Normal, 1 = Branco, 2 = Transparente
-	private int damageMode = 0;
 
 	private int useSpell = 0, max_spell = 0;
 	public boolean isCasting = false, nextSpell = false;
@@ -41,47 +26,47 @@ public class Player extends Entity{
 	public Player(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
 		
-		rightPlayer = new BufferedImage[2];
-		leftPlayer = new BufferedImage[2];
-		upPlayer = new BufferedImage[2];
-		downPlayer = new BufferedImage[2];
+		rightCreature = new BufferedImage[2];
+		leftCreature = new BufferedImage[2];
+		upCreature = new BufferedImage[2];
+		downCreature = new BufferedImage[2];
 		
 		for(int i = 0; i < 2; i++) {
-			rightPlayer[i] = Game.spritesheet.getSprite(96+(i*16), 0, 16, 16);
+			rightCreature[i] = Game.spritesheet.getSprite(96+(i*16), 0, 16, 16);
 		}
 		for(int i = 0; i < 2; i++) {
-			leftPlayer[i] = Game.spritesheet.getSprite(64+(i*16), 0, 16, 16);
+			leftCreature[i] = Game.spritesheet.getSprite(64+(i*16), 0, 16, 16);
 		}
 		for(int i = 0; i < 2; i++) {
-			upPlayer[i] = Game.spritesheet.getSprite(32+(i*16), 0, 16, 16);
+			upCreature[i] = Game.spritesheet.getSprite(32+(i*16), 0, 16, 16);
 		}
 		for(int i = 0; i < 2; i++) {
-			downPlayer[i] = Game.spritesheet.getSprite(0+(i*16), 0, 16, 16);
+			downCreature[i] = Game.spritesheet.getSprite(0+(i*16), 0, 16, 16);
 		}
 	}
 
 	public void tick() {
 		moved = false;
-		if(right && World.isFree((int)(x + spd),this.getY())) {
+		if(right && World.isFree((int)(x + speed),this.getY())) {
 			moved = true;
 			dir = right_dir;
-			x+=spd;
+			x+=speed;
 		}
-		else if (left && World.isFree((int)(x - spd),this.getY())) {
+		else if (left && World.isFree((int)(x - speed),this.getY())) {
 			moved = true;
 			dir = left_dir;
-			x-=spd;
+			x-=speed;
 		}
 		
-		else if(up && World.isFree(this.getX(),(int)(y - spd))) {
+		else if(up && World.isFree(this.getX(),(int)(y - speed))) {
 			moved = true;
 			dir = up_dir;
-			y-=spd;
+			y-=speed;
 		}
-		else if (down && World.isFree(this.getX(),(int)(y + spd))) {
+		else if (down && World.isFree(this.getX(),(int)(y + speed))) {
 			moved = true;
 			dir = down_dir;
-			y+=spd;
+			y+=speed;
 		}
 		
 		if(moved) {
@@ -271,38 +256,7 @@ public class Player extends Entity{
 	}
 	
 	public void render(Graphics2D g2d) {
-		g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + 2, null);
-
-    	// Descobre qual é a sprite atual com base na direção
-    	BufferedImage spriteAtual = null;
-    	if (dir == right_dir) {
-			spriteAtual = rightPlayer[index];
-		} else if (dir == left_dir) {
-			spriteAtual = leftPlayer[index];
-		} else if (dir == up_dir) {
-			spriteAtual = upPlayer[index];
-		} else if (dir == down_dir) {
-			spriteAtual = downPlayer[index];
-		}
-
-    	if (spriteAtual == null) return;
-
-    	// Efeito visual com base no estado de dano
-	    if (this.isDamaged) {
-    	    if (this.damageMode == 1) {
-        	    // Desenha a versão totalmente branca
-            	spriteAtual = gersarSpriteBranca(spriteAtual);
-	            g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
-    	    } else if (this.damageMode == 2) {
-        	    // Não desenha nada (totalmente transparente)
-        	} else {
-            	// Desenha normal
-            	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
-        	}
-	    } else {
-    	    // Caso não tiver levado dano, desenha normalmente
-        	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
-    	}
+		super.render(g2d);
 
 		render_Magic_Focus(g2d);
 	}
@@ -338,25 +292,5 @@ public class Player extends Entity{
 					break;
 			}
 		}
-	}
-
-	private BufferedImage gersarSpriteBranca(BufferedImage image) {
-    	// Cria uma nova imagem temporária com o mesmo tamanho e tipo da original
-    	BufferedImage branca = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-    
-	    for (int x = 0; x < image.getWidth(); x++) {
-    	    for (int y = 0; y < image.getHeight(); y++) {
-        	    int pixel = image.getRGB(x, y);
-            	int alpha = (pixel >> 24) & 0xff;
-
-	            // Se o pixel não for totalmente transparente, transforma em branco
-    	        if (alpha > 0) {
-        	        // 0xFFFFFF é o código hexadecimal para a cor Branca
-            	    int pixelBranco = (alpha << 24) | 0xFFFFFF;
-                	branca.setRGB(x, y, pixelBranco);
-            	}
-        	}
-    	}
-    	return branca;
 	}
 }

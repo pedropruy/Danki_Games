@@ -5,26 +5,9 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.peperonistudios.main.Game;
-import com.peperonistudios.world.Camera;
 import com.peperonistudios.world.World;
 
-public class Enemy extends Entity{
-
-	public int right_dir = 0, left_dir = 1, up_dir = 2, down_dir = 3;
-	public int dir = down_dir;
-	private double speed = 1;
-	
-	private int frames = 0, maxFrames = 30, index = 0, maxIndex = 1;
-	private boolean moved = false;
-	private BufferedImage[] rightEnemy;
-	private BufferedImage[] leftEnemy;
-	private BufferedImage[] upEnemy;
-	private BufferedImage[] downEnemy;
-
-	public boolean isDamaged = false;
-	private int isDamagedFrames = 0;
-	// 0 = Normal, 1 = Branco, 2 = Transparente
-	private int damageMode = 0;
+public class Enemy extends Creature {
 
 	public double max_life = 3, life = max_life;
 
@@ -34,22 +17,22 @@ public class Enemy extends Entity{
 		// Tem que trocar isto caso for fazer outro inimigo
 		this.setMask(2, 3, 13, 11);
 
-		rightEnemy = new BufferedImage[2];
-		leftEnemy = new BufferedImage[2];
-		upEnemy = new BufferedImage[2];
-		downEnemy = new BufferedImage[2];
+		rightCreature = new BufferedImage[2];
+		leftCreature = new BufferedImage[2];
+		upCreature = new BufferedImage[2];
+		downCreature = new BufferedImage[2];
 
 		for(int i = 0; i < 2; i++) {
-			rightEnemy[i] = Game.spritesheet.getSprite(96+(i*16), 32, 16, 16);
+			rightCreature[i] = Game.spritesheet.getSprite(96+(i*16), 32, 16, 16);
 		}
 		for(int i = 0; i < 2; i++) {
-			leftEnemy[i] = Game.spritesheet.getSprite(64+(i*16), 32, 16, 16);
+			leftCreature[i] = Game.spritesheet.getSprite(64+(i*16), 32, 16, 16);
 		}
 		for(int i = 0; i < 2; i++) {
-			upEnemy[i] = Game.spritesheet.getSprite(32+(i*16), 32, 16, 16);
+			upCreature[i] = Game.spritesheet.getSprite(32+(i*16), 32, 16, 16);
 		}
 		for(int i = 0; i < 2; i++) {
-			downEnemy[i] = Game.spritesheet.getSprite(0+(i*16), 32, 16, 16);
+			downCreature[i] = Game.spritesheet.getSprite(0+(i*16), 32, 16, 16);
 		}
 	}
 
@@ -187,57 +170,5 @@ public class Enemy extends Entity{
 	}
 
 	public void render(Graphics2D g2d) {
-		g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y, null);
-
-		// Descobre qual é a sprite atual com base na direção
-    	BufferedImage spriteAtual = null;
-    	if (dir == right_dir) {
-			spriteAtual = rightEnemy[index];
-		} else if (dir == left_dir) {
-			spriteAtual = leftEnemy[index];
-		} else if (dir == up_dir) {
-			spriteAtual = upEnemy[index];
-		} else if (dir == down_dir) {
-			spriteAtual = downEnemy[index];
-		}
-
-    	if (spriteAtual == null) return;
-
-    	// Efeito visual com base no estado de dano
-	    if (this.isDamaged) {
-    	    if (this.damageMode == 1) {
-        	    // Desenha a versão totalmente branca
-            	spriteAtual = gersarSpriteBranca(spriteAtual);
-	            g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
-    	    } else if (this.damageMode == 2) {
-        	    // Não desenha nada (totalmente transparente)
-        	} else {
-            	// Desenha normal
-            	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
-        	}
-	    } else {
-    	    // Caso não tiver levado dano, desenha normalmente
-        	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
-    	}
-	}
-
-	private BufferedImage gersarSpriteBranca(BufferedImage image) {
-    	// Cria uma nova imagem temporária com o mesmo tamanho e tipo da original
-    	BufferedImage branca = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
-    
-	    for (int x = 0; x < image.getWidth(); x++) {
-    	    for (int y = 0; y < image.getHeight(); y++) {
-        	    int pixel = image.getRGB(x, y);
-            	int alpha = (pixel >> 24) & 0xff;
-
-	            // Se o pixel não for totalmente transparente, transforma em branco
-    	        if (alpha > 0) {
-        	        // 0xFFFFFF é o código hexadecimal para a cor Branca
-            	    int pixelBranco = (alpha << 24) | 0xFFFFFF;
-                	branca.setRGB(x, y, pixelBranco);
-            	}
-        	}
-    	}
-    	return branca;
 	}
 }
