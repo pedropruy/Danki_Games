@@ -1,7 +1,7 @@
 package com.peperonistudios.entities;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
@@ -10,16 +10,25 @@ import com.peperonistudios.world.Camera;
 
 public class Entity {
 
+	public static BufferedImage GROUND_SHADOW_EN = Game.spritesheet.getSprite(144, 48, 16, 16);
+
 	public static BufferedImage LIFE_ELIXIR_EN = Game.spritesheet.getSprite(144, 16, 16, 16);
 	public static BufferedImage MANA_ELIXIR_EN = Game.spritesheet.getSprite(144, 0, 16, 16);
 	public static BufferedImage PURP_SLIME_EN = Game.spritesheet.getSprite(0,32, 16, 16);
+	
 	public static BufferedImage MAGIC_FOCUS_EN = Game.spritesheet.getSprite(128,48, 8, 8);
-	public static BufferedImage BASIC_ATTACK_EN = Game.spritesheet.getSprite(0,48, 16, 16);
+	public static BufferedImage BASIC_ATTACK1_EN = Game.spritesheet.getSprite(0,48, 16, 16);
+	public static BufferedImage BASIC_ATTACK2_EN = Game.spritesheet.getSprite(16,48, 16, 16);
+	
 	public static BufferedImage FIRE_FOCUS_EN = Game.spritesheet.getSprite(136,48, 8, 8);
 	public static BufferedImage FIRE_BOOK_EN = Game.spritesheet.getSprite(128, 0, 16, 16);
-	public static BufferedImage FIRE_BALL_EN = Game.spritesheet.getSprite(32,48, 16, 16);
+	public static BufferedImage FIRE_BALL1_EN = Game.spritesheet.getSprite(32,48, 16, 16);
+	public static BufferedImage FIRE_BALL2_EN = Game.spritesheet.getSprite(48,48, 16, 16);
+	
 	public static BufferedImage ICE_FOCUS_EN = Game.spritesheet.getSprite(128,56, 8, 8);
 	public static BufferedImage ICE_BOOK_EN = Game.spritesheet.getSprite(128, 16, 16, 16);
+	public static BufferedImage ICE_CRYSTAL1_EN = Game.spritesheet.getSprite(64,48, 16, 16);
+	public static BufferedImage ICE_CRYSTAL2_EN = Game.spritesheet.getSprite(80,48, 16, 16);
 	
 	protected double x;
 	protected double y;
@@ -75,7 +84,6 @@ public class Entity {
 	}
 	
 	public void tick() {
-		
 	}
 
 	public static boolean isColliding (Entity e1, Entity e2) {
@@ -86,9 +94,6 @@ public class Entity {
 	}
 
 	
-	public void render(Graphics g) {
-		g.drawImage(sprite, this.getX() - Camera.x, this.getY() - Camera.y, null);
-		//g.setColor(Color.red);
-		//g.fillRect(this.getX() - Camera.x + maskx, this.getY() - Camera.y + masky, maskw, maskh);
+	public void render(Graphics2D g2d) {
 	}
 }

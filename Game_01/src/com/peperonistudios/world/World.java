@@ -1,6 +1,6 @@
 package com.peperonistudios.world;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -10,7 +10,7 @@ import com.peperonistudios.entities.Enemy;
 import com.peperonistudios.entities.Entity;
 import com.peperonistudios.entities.LifeElixir;
 import com.peperonistudios.entities.ManaElixir;
-import com.peperonistudios.entities.Spell;
+import com.peperonistudios.entities.SpellBook;
 import com.peperonistudios.main.Game;
 
 public class World {
@@ -76,22 +76,31 @@ public class World {
                 LifeElixir le = new LifeElixir(xx * 16, yy * 16, 16, 16, Entity.LIFE_ELIXIR_EN,
                                                3, 3, 10, 13);
                 Game.entities.add(le);
-                Game.itens.add(le);
+                Game.collectables.add(le);
                 break;
             case 0xFF007F7F:
                 // MANA ELIXIR
                 ManaElixir me = new ManaElixir(xx * 16, yy * 16, 16, 16, Entity.MANA_ELIXIR_EN,
                                                3, 3, 10, 13);
                 Game.entities.add(me);
-                Game.itens.add(me);
+                Game.collectables.add(me);
                 break;
             case 0xFFFF0000:
                 // FIRE MAGIC BOOK
-                Spell sp = new Spell(xx * 16, yy * 16, 16, 16, Entity.FIRE_BOOK_EN,
+                SpellBook fire = new SpellBook(xx * 16, yy * 16, 16, 16, Entity.FIRE_BOOK_EN,
                                      1, 2, 15, 13);
-                Game.entities.add(sp);
-                Game.itens.add(sp);
+                Game.entities.add(fire);
+                Game.collectables.add(fire);
                 break;
+
+            case 0xFF0026FF:
+                // ICE MAGIC BOOK
+                SpellBook ice = new SpellBook(xx * 16, yy * 16, 16, 16, Entity.ICE_BOOK_EN,
+                                     1, 2, 15, 13);
+                Game.entities.add(ice);
+                Game.collectables.add(ice);
+                break;
+
             default:
         		// Por padrão, sempre criamos o tile do chão
         		tiles[xx + (yy * WIDTH)] = new WallTile(xx * 16, yy * 16, Tile.TILE_GRASS);
@@ -127,7 +136,7 @@ public class World {
 
     }
 
-	public void render(Graphics g) {
+	public void render(Graphics2D g2d) {
 		int xstart = Camera.x >> 4;
 		int ystart = Camera.y >> 4;
 
@@ -146,7 +155,7 @@ public class World {
 				if(xx < 0 || yy < 0 || xx >= WIDTH || yy >= HEIGHT)
 					continue;
 				Tile tile = tiles[xx + (yy*WIDTH)];
-				tile.render(g);
+				tile.render(g2d);
 			}
 		}
 	}

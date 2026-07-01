@@ -1,6 +1,6 @@
 package com.peperonistudios.entities;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
@@ -20,6 +20,13 @@ public class Enemy extends Entity{
 	private BufferedImage[] leftEnemy;
 	private BufferedImage[] upEnemy;
 	private BufferedImage[] downEnemy;
+
+	public boolean isDamaged = false;
+	private int isDamagedFrames = 0;
+	// 0 = Normal, 1 = Branco, 2 = Transparente
+	private int damageMode = 0;
+
+	public double max_life = 3, life = max_life;
 
 	public Enemy(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, null, maskx, masky, maskw, maskh);
@@ -47,8 +54,9 @@ public class Enemy extends Entity{
 	}
 
 	public void tick () {
+		if (this.life > 0) {
 		if (this.isCollidingWithPlayer() == false) {
-		if (Game.rand.nextInt(100) < 30) {
+		if (Game.rand.nextInt(100) < 30 && !this.isDamaged) {
 			if ((int)x < Game.player.getX() && World.isFree((int)(x+speed), this.getY())
 				&& !isColliding((int)(x+speed), this.getY())) {
 				moved = true;
@@ -94,6 +102,48 @@ public class Enemy extends Entity{
 				}
 			}
 		}
+
+		// Controla a animação de dano
+		if (this.isDamaged) {
+    		this.isDamagedFrames++;
+    
+    		// Altera o estado a cada 4 frames (Sinta-se livre para mudar o 4 para alterar a velocidade do piscar)
+    		if (this.isDamagedFrames % 12 < 4) {
+    		    this.damageMode = 1; // Modo Branco
+   		 	} else if (this.isDamagedFrames % 12 < 8) {
+    		    this.damageMode = 2; // Modo Transparente (Invisível)
+    		} else {
+    		    this.damageMode = 0; // Modo Normal
+    		}
+
+    		// Se atingiu o tempo total do dano (30 frames)
+   			if (this.isDamagedFrames >= 30) {
+    		    this.isDamagedFrames = 0;
+    		    this.isDamaged = false;
+    		    this.damageMode = 0; // Garante que volta ao normal ao acabar o dano
+    		}
+		}
+
+		isCollidingWithProjectiles();
+
+		} else {
+			this.isDamagedFrames++;
+    
+    		// Altera o estado a cada 4 frames (Sinta-se livre para mudar o 4 para alterar a velocidade do piscar)
+    		if (this.isDamagedFrames % 12 < 4) {
+    		    this.damageMode = 1; // Modo Branco
+   		 	} else if (this.isDamagedFrames % 12 < 8) {
+    		    this.damageMode = 2; // Modo Transparente (Invisível)
+    		} else {
+    		    this.damageMode = 0; // Modo Normal
+    		}
+
+    		// Se atingiu o tempo total do dano (30 frames)
+   			if (this.isDamagedFrames >= 30) {
+				destroySelf();
+				return;
+    		}
+		}
 	}
 
 	public boolean isCollidingWithPlayer() {
@@ -117,15 +167,77 @@ public class Enemy extends Entity{
 		return false;
 	}
 
-	public void render(Graphics g) {
-		if(dir == right_dir) {
-			g.drawImage(rightEnemy[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
-		}else if(dir == left_dir) {
-			g.drawImage(leftEnemy[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
-		}else if(dir == up_dir) {
-			g.drawImage(upEnemy[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
-		}else if(dir == down_dir) {
-			g.drawImage(downEnemy[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
+	public boolean isCollidingWithProjectiles() {
+		for (int i = 0; i < Game.projectiles.size(); i++) {
+			Projectile e = Game.projectiles.get(i);
+			
+			if (Entity.isColliding(this, e) && !isDamaged) {
+				life -= e.damage;
+				this.isDamaged = true;
+				Game.projectiles.remove(e);
+			}
 		}
+
+		return false;
+	}
+
+	public void destroySelf () {
+		Game.enemies.remove(this);
+		Game.entities.remove(this);
+	}
+
+	public void render(Graphics2D g2d) {
+		g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y, null);
+
+		// Descobre qual é a sprite atual com base na direção
+    	BufferedImage spriteAtual = null;
+    	if (dir == right_dir) {
+			spriteAtual = rightEnemy[index];
+		} else if (dir == left_dir) {
+			spriteAtual = leftEnemy[index];
+		} else if (dir == up_dir) {
+			spriteAtual = upEnemy[index];
+		} else if (dir == down_dir) {
+			spriteAtual = downEnemy[index];
+		}
+
+    	if (spriteAtual == null) return;
+
+    	// Efeito visual com base no estado de dano
+	    if (this.isDamaged) {
+    	    if (this.damageMode == 1) {
+        	    // Desenha a versão totalmente branca
+            	spriteAtual = gersarSpriteBranca(spriteAtual);
+	            g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+    	    } else if (this.damageMode == 2) {
+        	    // Não desenha nada (totalmente transparente)
+        	} else {
+            	// Desenha normal
+            	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+        	}
+	    } else {
+    	    // Caso não tiver levado dano, desenha normalmente
+        	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+    	}
+	}
+
+	private BufferedImage gersarSpriteBranca(BufferedImage image) {
+    	// Cria uma nova imagem temporária com o mesmo tamanho e tipo da original
+    	BufferedImage branca = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+    
+	    for (int x = 0; x < image.getWidth(); x++) {
+    	    for (int y = 0; y < image.getHeight(); y++) {
+        	    int pixel = image.getRGB(x, y);
+            	int alpha = (pixel >> 24) & 0xff;
+
+	            // Se o pixel não for totalmente transparente, transforma em branco
+    	        if (alpha > 0) {
+        	        // 0xFFFFFF é o código hexadecimal para a cor Branca
+            	    int pixelBranco = (alpha << 24) | 0xFFFFFF;
+                	branca.setRGB(x, y, pixelBranco);
+            	}
+        	}
+    	}
+    	return branca;
 	}
 }

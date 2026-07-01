@@ -4,8 +4,11 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -15,6 +18,7 @@ import java.util.Random;
 import javax.swing.JFrame;
 
 import com.peperonistudios.entities.Entity;
+import com.peperonistudios.entities.Collectable;
 import com.peperonistudios.entities.Enemy;
 import com.peperonistudios.entities.Player;
 import com.peperonistudios.entities.Projectile;
@@ -22,7 +26,7 @@ import com.peperonistudios.graficos.Spritesheet;
 import com.peperonistudios.graficos.UI;
 import com.peperonistudios.world.World;
 
-public class Game extends Canvas implements Runnable, KeyListener {
+public class Game extends Canvas implements Runnable, KeyListener, MouseListener {
 
 	private static final long serialVersionUID = 1L;
 	public static JFrame frame;
@@ -36,7 +40,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	
 	public static List<Entity> entities;
 	public static List<Enemy> enemies;
-	public static List<Entity> itens;
+	public static List<Collectable> collectables;
 	public static List<Projectile> projectiles;
 	public static Spritesheet spritesheet;
 	
@@ -51,13 +55,14 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public Game() {
 		rand = new Random();
 		addKeyListener(this);
+		addMouseListener(this);
 		setPreferredSize(new Dimension(WIDTH*SCALE, HEIGHT*SCALE));
 		initFrame();
 		//Inicializando objetos
 		image = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_RGB);
 		entities = new ArrayList<Entity>();
 		enemies = new ArrayList<Enemy>();
-		itens = new ArrayList<Entity>();
+		collectables = new ArrayList<Collectable>();
 		projectiles = new ArrayList<Projectile>();
 
 		spritesheet = new Spritesheet("/spritesheet.png");
@@ -103,8 +108,7 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	
 	public void tick() {
 		for (int i = 0; i < entities.size(); i++) {
-			Entity e = entities.get(i);
-			e.tick();
+			entities.get(i).tick();
 		}
 
 		for (int i = 0; i < projectiles.size(); i++) {
@@ -118,27 +122,27 @@ public class Game extends Canvas implements Runnable, KeyListener {
 			this.createBufferStrategy(3);
 			return;
 		}
-		Graphics g = image.getGraphics();
-		g.setColor(Color.BLACK);
-		g.fillRect(0, 0,WIDTH,HEIGHT);
+		Graphics2D g2d = (Graphics2D) image.getGraphics();
+		g2d.setColor(Color.BLACK);
+		g2d.fillRect(0, 0,WIDTH,HEIGHT);
 		
 		
 		/*Renderização do jogo
 		Graphics2D g2 = (Graphics2D) g;*/
-		world.render(g);
+		world.render(g2d);
 		
 		for(int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
-			e.render(g);
+			e.render(g2d);
 		}
 
 		for (int i = 0; i < projectiles.size(); i++) {
-			projectiles.get(i).render(g);
+			projectiles.get(i).render(g2d);
 		}
-		ui.render(g);
+		ui.render(g2d);
 		/***/
-		g.dispose();
-		g = bs.getDrawGraphics();
+		g2d.dispose();
+		Graphics g = bs.getDrawGraphics();
 		g.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
 		// Caso eu queira que a fonte nn use o scale
 		bs.show();
@@ -196,6 +200,10 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		if (e.getKeyCode() == KeyEvent.VK_C) {
 			player.isCasting = true;
 		}
+
+		if (e.getKeyCode() == KeyEvent.VK_V) {
+			player.nextSpell = true;
+		}
 	}
 
 	@Override
@@ -219,6 +227,44 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		if (e.getKeyCode() == KeyEvent.VK_C) {
 			player.isCasting = false;
 		}
+
+		if (e.getKeyCode() == KeyEvent.VK_V) {
+			player.nextSpell = false;
+		}
+	}
+
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+	}
+
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+	}
+
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+	}
+
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		player.isCastingMouse = true;
+		player.mx = (e.getX() / SCALE);
+		player.my = (e.getY() / SCALE);
+	}
+
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		player.isCastingMouse = false;
+		player.mx = 0;
+		player.my = 0;
 	}
 	
 }

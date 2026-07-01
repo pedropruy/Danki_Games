@@ -1,6 +1,6 @@
 package com.peperonistudios.entities;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
@@ -28,9 +28,12 @@ public class Player extends Entity{
 	// 0 = Normal, 1 = Branco, 2 = Transparente
 	private int damageMode = 0;
 
-	private int useSpell = 0;
-	public boolean isCasting = false;
+	private int useSpell = 0, max_spell = 0;
+	public boolean isCasting = false, nextSpell = false;
 	private boolean gotFireBook = false, gotIceBook = false;
+
+	public boolean isCastingMouse = false;
+	public int mx = 0, my = 0;
 
 	public static double max_mana = 40, mana = 0;
 	public static double max_life = 3, life = max_life;
@@ -92,6 +95,7 @@ public class Player extends Entity{
 			}
 		}
 
+		// Controla a animação de dano
 		if (this.isDamaged) {
     		this.isDamagedFrames++;
     
@@ -112,47 +116,29 @@ public class Player extends Entity{
     		}
 		}
 
-		if (isCasting) {
-			isCasting = false;
-			if (!isDamaged) {
-				int dx = 0, dy = 0;
-				int px = this.getX(), py = this.getY();
-				if (dir == right_dir) {
-					dx = 1;
-					px += 8;
-				} else if (dir == left_dir) {
-					dx = -1;
-					px -= 8;
-				}
+		// Trocar de Magia
+		if (this.nextSpell) {
+			this.nextSpell = false;
+			this.useSpell++;
 
-				if (dir == down_dir) {
-					dy = 1;
-					py += 8;
-				} else if (dir == up_dir) {
-					dy = -1;
-					py -= 8;
-				}
-				
-				Projectile spell = new Projectile(px, py, 8, 8, Entity.BASIC_ATTACK_EN,
-								     		      0, 0, 8, 8, dx, dy, 20);
-				if (gotFireBook && mana > 0) {
-					spell = new Projectile(px, py, 8, 8, Entity.FIRE_BALL_EN,
-								     	   0, 0, 8, 8, dx, dy, 30);					
-					mana--;
-				}
-				Game.projectiles.add(spell);
-			}			
+			if (mana == 0) 
+				this.useSpell = 0;
+
+			if (this.useSpell > this.max_spell) 
+				this.useSpell = 0;
 		}
+
+		castSpell();
 
 		// Game over simples!
 		if (life <= 0) {
 			Game.entities.clear();
 			Game.enemies.clear();
-			Game.itens.clear();
+			Game.collectables.clear();
 			Game.projectiles.clear();
 			Game.entities = new ArrayList<Entity>();
 			Game.enemies = new ArrayList<Enemy>();
-			Game.itens = new ArrayList<Entity>();
+			Game.collectables = new ArrayList<Collectable>();
 			Game.projectiles = new ArrayList<Projectile>();
 			Game.spritesheet = new Spritesheet("/spritesheet.png");
 			Game.player = new Player(0,0,16,16,Game.spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
@@ -168,88 +154,187 @@ public class Player extends Entity{
 		Camera.y = Camera.clamp(this.getY() - (Game.HEIGHT/2) + (this.getHeight()/2),0,World.HEIGHT*16 - Game.HEIGHT);
 	}
 
+	public void castSpell() {
+		double dx = 0, dy = 0;
+		double angle = 0;
+		int px = this.getX(), py = this.getY();
+		if (isCasting) {
+			if (!isDamaged) {
+				if (dir == right_dir) {
+					dx = 1;
+					px += 8;
+					angle = -90;
+				} else if (dir == left_dir) {
+					dx = -1;
+					px -= 8;
+					angle = 90;
+				}
+
+				if (dir == down_dir) {
+					dy = 1;
+					py += 8;
+				} else if (dir == up_dir) {
+					dy = -1;
+					py -= 8;
+					angle = 180;
+				}
+			}			
+		} else if (isCastingMouse) {
+			if (!isDamaged) {
+				double mouse_angle = Math.atan2(this.my - (this.getY() + 8 - Camera.y),
+					 						    this.mx - (this.getX() + 8  - Camera.x));
+				dx = Math.cos(mouse_angle);
+				dy = Math.sin(mouse_angle);
+				px = this.getX();
+				py = this.getY();
+
+				angle = Math.toDegrees(mouse_angle) - 90;
+			}			
+		}
+
+		if (isCasting || isCastingMouse) {
+			this.isCasting = false;
+			this.isCastingMouse = false;
+			if (!isDamaged) {
+				Projectile spell = new Projectile(px, py, 8, 8, Entity.BASIC_ATTACK1_EN, Entity.BASIC_ATTACK2_EN,
+										     		      4, 4, 8, 8, dx, dy, 20, angle, 1);
+				switch (useSpell) {
+					case 0:
+						// Nada porque já é definido acima
+					break;
+				    
+					case 1:
+						if (mana > 0 && this.gotFireBook) {
+						spell = new Projectile(px, py, 8, 8, Entity.FIRE_BALL1_EN, Entity.FIRE_BALL2_EN,
+										       3, 3, 10, 11, dx, dy, 30, angle, 5);					
+						mana--;
+						if (mana == 0) this.useSpell = 0;
+						} else this.useSpell = 0;
+					break;
+					
+					case 2:
+						if (mana > 0 && this.gotIceBook) {
+						spell = new Projectile(px, py, 8, 8, Entity.ICE_CRYSTAL1_EN, Entity.ICE_CRYSTAL2_EN,
+										       4, 2, 8, 12, dx, dy, 40, angle, 10);					
+						mana--;
+						if (mana == 0) this.useSpell = 0;
+						} else this.useSpell = 0;
+					break;
+				}
+				Game.projectiles.add(spell);
+			}
+		}
+	}
+
 	public void checkCollisionItems () {
-		for (int i = 0; i < Game.itens.size(); i++) {
-			Entity atual = Game.itens.get(i);
+		for (int i = 0; i < Game.collectables.size(); i++) {
+			Entity atual = Game.collectables.get(i);
+			// Colisão com elixir da vida
 			if (atual instanceof LifeElixir) {
 				if (Entity.isColliding(this, atual)) {
 					life += 2;
 					if (life > max_life) life = max_life;
-					Game.itens.remove(i);
+					Game.collectables.remove(i);
 					Game.entities.remove(atual);
 				}
 			}
-
+			// Colisão com elixir de mana
 			if (atual instanceof ManaElixir) {
 				if (Entity.isColliding(this, atual)) {
 					mana += 10;
 					if (mana > max_mana) mana = max_mana;
-					Game.itens.remove(i);
+					Game.collectables.remove(i);
 					Game.entities.remove(atual);
 				}
 			}
-
-			if (atual instanceof Spell) {
+			// Colisão com livros de magia
+			if (atual instanceof SpellBook) {
 				if (Entity.isColliding(this, atual)) {
-					this.gotFireBook = true;
-					this.useSpell = 1;
-					Game.itens.remove(i);
+					if (atual.sprite == Entity.FIRE_BOOK_EN) {
+						if (!this.gotFireBook) {
+							this.gotFireBook = true;
+							this.max_spell++;
+							this.useSpell = 1;
+						}
+					} if (atual.sprite == Entity.ICE_BOOK_EN) {
+						if (!this.gotIceBook) {
+							this.gotIceBook = true;
+							this.max_spell++;
+							this.useSpell = 2;
+						}
+					}
+					Game.collectables.remove(i);
 					Game.entities.remove(atual);
 				}
 			}
 		}
 	}
 	
-	public void render(Graphics g) {
-    	// 1. Descobre qual é a sprite atual com base na direção
+	public void render(Graphics2D g2d) {
+		g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + 2, null);
+
+    	// Descobre qual é a sprite atual com base na direção
     	BufferedImage spriteAtual = null;
-		int xFocus = 0, yFocus = 0;
     	if (dir == right_dir) {
 			spriteAtual = rightPlayer[index];
-			xFocus = 13; yFocus = 7;
 		} else if (dir == left_dir) {
 			spriteAtual = leftPlayer[index];
-			xFocus = -5; yFocus = 7;
 		} else if (dir == up_dir) {
 			spriteAtual = upPlayer[index];
-			xFocus = 4; yFocus = -2;
 		} else if (dir == down_dir) {
 			spriteAtual = downPlayer[index];
-			xFocus = 4; yFocus = 9;
 		}
 
     	if (spriteAtual == null) return;
 
-    	// 2. Aplica o efeito visual com base no damageMode
+    	// Efeito visual com base no estado de dano
 	    if (this.isDamaged) {
     	    if (this.damageMode == 1) {
         	    // Desenha a versão totalmente branca
             	spriteAtual = gersarSpriteBranca(spriteAtual);
-	            g.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+	            g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
     	    } else if (this.damageMode == 2) {
-        	    // Modo Transparente: simplesmente NÃO damos drawImage (o player fica invisível por esse frame)
+        	    // Não desenha nada (totalmente transparente)
         	} else {
-            	// Modo Normal dentro do período de dano
-            	g.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+            	// Desenha normal
+            	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
         	}
 	    } else {
-    	    // Se NÃO estiver danificado, desenha o player normalmente
-        	g.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+    	    // Caso não tiver levado dano, desenha normalmente
+        	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
     	}
 
-		// Tenha pegado Magia de Fogo
+		render_Magic_Focus(g2d);
+	}
+
+	private void render_Magic_Focus(Graphics2D g2d) {
+		int xFocus = 0, yFocus = 0;
+    	if (dir == right_dir) {
+			xFocus = 13; yFocus = 7;
+		} else if (dir == left_dir) {
+			xFocus = -5; yFocus = 7;
+		} else if (dir == up_dir) {
+			xFocus = 4; yFocus = -2;
+		} else if (dir == down_dir) {
+			xFocus = 4; yFocus = 9;
+		}
+
 		if (dir != up_dir) {
 			switch (useSpell) {
 				case 0:
-					g.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
+					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
 					break;
 
 				case 1:
-					g.drawImage(Entity.FIRE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
+					g2d.drawImage(Entity.FIRE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
 					break;
+				
+				case 2:
+					g2d.drawImage(Entity.ICE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
+				break;
 			
 				default:
-					g.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
+					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
 					break;
 			}
 		}

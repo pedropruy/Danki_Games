@@ -1,6 +1,6 @@
 package com.peperonistudios.world;
 
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
 import com.peperonistudios.main.Game;
@@ -25,8 +25,8 @@ public class Tile {
 		this.sprite = sprite;
 	}
 	
-	public void render(Graphics g) {
-		g.drawImage(sprite,x - Camera.x,y - Camera.y,null);
+	public void render(Graphics2D g2d) {
+		g2d.drawImage(sprite,x - Camera.x,y - Camera.y,null);
 	}
 }
 
