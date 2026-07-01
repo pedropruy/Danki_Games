@@ -4,8 +4,8 @@ import java.awt.image.BufferedImage;
 
 public class Spell extends Entity{
 
-	public Spell(int x, int y, int width, int height, BufferedImage sprite) {
-		super(x, y, width, height, sprite);
+	public Spell(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
+		super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
 	}
 
 }

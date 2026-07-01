@@ -1,6 +1,5 @@
 package com.peperonistudios.entities;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -14,9 +13,6 @@ public class Enemy extends Entity{
 	public int right_dir = 0, left_dir = 1, up_dir = 2, down_dir = 3;
 	public int dir = down_dir;
 	private double speed = 1;
-
-	// Máscara de colisão
-	private int maskx = 2, masky = 3, maskw = 12, maskh = 11;
 	
 	private int frames = 0, maxFrames = 30, index = 0, maxIndex = 1;
 	private boolean moved = false;
@@ -25,8 +21,11 @@ public class Enemy extends Entity{
 	private BufferedImage[] upEnemy;
 	private BufferedImage[] downEnemy;
 
-	public Enemy(int x, int y, int width, int height, BufferedImage sprite) {
-		super(x, y, width, height, null);
+	public Enemy(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
+		super(x, y, width, height, null, maskx, masky, maskw, maskh);
+		
+		// Tem que trocar isto caso for fazer outro inimigo
+		this.setMask(2, 3, 13, 11);
 
 		rightEnemy = new BufferedImage[2];
 		leftEnemy = new BufferedImage[2];
@@ -48,6 +47,7 @@ public class Enemy extends Entity{
 	}
 
 	public void tick () {
+		if (this.isCollidingWithPlayer() == false) {
 		if (Game.rand.nextInt(100) < 30) {
 			if ((int)x < Game.player.getX() && World.isFree((int)(x+speed), this.getY())
 				&& !isColliding((int)(x+speed), this.getY())) {
@@ -72,9 +72,18 @@ public class Enemy extends Entity{
 				moved = true;
 				dir = up_dir;
 				y -= speed;
+			}	
+		}
+		} else {
+			// Estamos colidindo com o player
+			if(!Game.player.isDamaged) {
+				if (Game.rand.nextInt(100) < 10) {
+					Game.player.isDamaged = true;
+					Player.life--;
+				}
 			}
 		}
-
+		
 		if(moved) {
 			frames++;
 			if(frames == maxFrames) {
@@ -85,6 +94,13 @@ public class Enemy extends Entity{
 				}
 			}
 		}
+	}
+
+	public boolean isCollidingWithPlayer() {
+		Rectangle enemyCurrent = new Rectangle(this.getX() + maskx, this.getY() + masky, maskw, maskh);
+		Rectangle player = new Rectangle(Game.player.getX(), Game.player.getY(), 16, 16);
+
+		return enemyCurrent.intersects(player);
 	}
 
 	public boolean isColliding (int xnext, int ynext) {

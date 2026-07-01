@@ -17,7 +17,9 @@ import javax.swing.JFrame;
 import com.peperonistudios.entities.Entity;
 import com.peperonistudios.entities.Enemy;
 import com.peperonistudios.entities.Player;
+import com.peperonistudios.entities.Projectile;
 import com.peperonistudios.graficos.Spritesheet;
+import com.peperonistudios.graficos.UI;
 import com.peperonistudios.world.World;
 
 public class Game extends Canvas implements Runnable, KeyListener {
@@ -34,6 +36,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	
 	public static List<Entity> entities;
 	public static List<Enemy> enemies;
+	public static List<Entity> itens;
+	public static List<Projectile> projectiles;
 	public static Spritesheet spritesheet;
 	
 	public static World world;
@@ -41,6 +45,8 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	public static Player player;
 
 	public static Random rand;
+
+	public UI ui;
 	
 	public Game() {
 		rand = new Random();
@@ -51,9 +57,13 @@ public class Game extends Canvas implements Runnable, KeyListener {
 		image = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_RGB);
 		entities = new ArrayList<Entity>();
 		enemies = new ArrayList<Enemy>();
+		itens = new ArrayList<Entity>();
+		projectiles = new ArrayList<Projectile>();
+
 		spritesheet = new Spritesheet("/spritesheet.png");
-		player = new Player(0,0,16,16,spritesheet.getSprite(0, 0, 16, 16));
+		player = new Player(0,0,16,16,spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
 		entities.add(player);
+		ui = new UI();
 		world = new World("/map.png");
 	}
 	
@@ -92,9 +102,13 @@ public class Game extends Canvas implements Runnable, KeyListener {
 	}
 	
 	public void tick() {
-		for(int i = 0; i < entities.size(); i++) {
+		for (int i = 0; i < entities.size(); i++) {
 			Entity e = entities.get(i);
 			e.tick();
+		}
+
+		for (int i = 0; i < projectiles.size(); i++) {
+			projectiles.get(i).tick();
 		}
 	}
 	
@@ -117,10 +131,16 @@ public class Game extends Canvas implements Runnable, KeyListener {
 			Entity e = entities.get(i);
 			e.render(g);
 		}
+
+		for (int i = 0; i < projectiles.size(); i++) {
+			projectiles.get(i).render(g);
+		}
+		ui.render(g);
 		/***/
 		g.dispose();
 		g = bs.getDrawGraphics();
 		g.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
+		// Caso eu queira que a fonte nn use o scale
 		bs.show();
 	}
 	
@@ -172,25 +192,33 @@ public class Game extends Canvas implements Runnable, KeyListener {
 				e.getKeyCode() == KeyEvent.VK_S) {
 			player.down = true;
 		}
+
+		if (e.getKeyCode() == KeyEvent.VK_C) {
+			player.isCasting = true;
+		}
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_RIGHT ||
-				e.getKeyCode() == KeyEvent.VK_D) {
-				player.right = false;
-			}else if(e.getKeyCode() == KeyEvent.VK_LEFT ||
-				e.getKeyCode() == KeyEvent.VK_A) {
-				player.left = false;
-			}
+			e.getKeyCode() == KeyEvent.VK_D) {
+			player.right = false;
+		}else if(e.getKeyCode() == KeyEvent.VK_LEFT ||
+			e.getKeyCode() == KeyEvent.VK_A) {
+			player.left = false;
+		}
 			
-			if(e.getKeyCode() == KeyEvent.VK_UP ||
-					e.getKeyCode() == KeyEvent.VK_W) {
-				player.up = false;
-			}else if (e.getKeyCode() == KeyEvent.VK_DOWN ||
-					e.getKeyCode() == KeyEvent.VK_S) {
-				player.down = false;
-			}
+		if(e.getKeyCode() == KeyEvent.VK_UP ||
+			e.getKeyCode() == KeyEvent.VK_W) {
+			player.up = false;
+		}else if (e.getKeyCode() == KeyEvent.VK_DOWN ||
+				e.getKeyCode() == KeyEvent.VK_S) {
+			player.down = false;
+		}
+
+		if (e.getKeyCode() == KeyEvent.VK_C) {
+			player.isCasting = false;
+		}
 	}
 	
 }

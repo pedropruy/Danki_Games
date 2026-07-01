@@ -66,21 +66,31 @@ public class World {
                 break;
             case 0xFFB200FF:
                 // PURPLE SLIME
-                Enemy en = new Enemy(xx * 16, yy * 16, 16, 16, Entity.PURP_SLIME_EN);
+                Enemy en = new Enemy(xx * 16, yy * 16, 16, 16, Entity.PURP_SLIME_EN,
+                                     2 , 3, 13, 11);
                 Game.entities.add(en);
                 Game.enemies.add(en);
                 break;
             case 0xFF007F0E:
                 // HEALTH ELIXIR
-                Game.entities.add(new LifeElixir(xx * 16, yy * 16, 16, 16, Entity.LIFE_ELIXIR_EN));
+                LifeElixir le = new LifeElixir(xx * 16, yy * 16, 16, 16, Entity.LIFE_ELIXIR_EN,
+                                               3, 3, 10, 13);
+                Game.entities.add(le);
+                Game.itens.add(le);
                 break;
             case 0xFF007F7F:
                 // MANA ELIXIR
-                Game.entities.add(new ManaElixir(xx * 16, yy * 16, 16, 16, Entity.MANA_ELIXIR_EN));
+                ManaElixir me = new ManaElixir(xx * 16, yy * 16, 16, 16, Entity.MANA_ELIXIR_EN,
+                                               3, 3, 10, 13);
+                Game.entities.add(me);
+                Game.itens.add(me);
                 break;
             case 0xFFFF0000:
                 // FIRE MAGIC BOOK
-                Game.entities.add(new Spell(xx * 16, yy * 16, 16, 16, Entity.FIRE_BOOK_EN));
+                Spell sp = new Spell(xx * 16, yy * 16, 16, 16, Entity.FIRE_BOOK_EN,
+                                     1, 2, 15, 13);
+                Game.entities.add(sp);
+                Game.itens.add(sp);
                 break;
             default:
         		// Por padrão, sempre criamos o tile do chão
