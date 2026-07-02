@@ -10,7 +10,7 @@ import com.peperonistudios.world.World;
 
 public class Enemy extends Creature {
 
-	public double max_life = 3, life = max_life;
+	public int max_life = 3, life = max_life;
 
 	public Enemy(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, null, maskx, masky, maskw, maskh);
@@ -70,7 +70,7 @@ public class Enemy extends Creature {
 			// Estamos colidindo com o player
 			if(!Game.player.isDamaged && !Game.player.isJumping) {
 				if (Game.rand.nextInt(100) < 10) {
-					Sound.hurtEffect.play();
+					//Sound.hurtEffect.play();
 					Game.player.isDamaged = true;
 					Player.life--;
 				}
@@ -158,7 +158,7 @@ public class Enemy extends Creature {
 			Projectile e = Game.projectiles.get(i);
 			
 			if (Entity.isColliding(this, e) && !isDamaged) {
-				Sound.hurtEffect.play();
+				//Sound.hurtEffect.play();
 				life -= e.damage;
 				this.isDamaged = true;
 				Game.projectiles.remove(e);

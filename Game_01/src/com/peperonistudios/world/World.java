@@ -187,6 +187,21 @@ public class World {
 		Game.world = new World("/" + level);
 	}
 
+    public static void loadLevel (String level) {
+		Game.entities.clear();
+		Game.enemies.clear();
+		Game.collectables.clear();
+		Game.projectiles.clear();
+		Game.entities = new ArrayList<Entity>();
+		Game.enemies = new ArrayList<Enemy>();
+		Game.collectables = new ArrayList<Collectable>();
+		Game.projectiles = new ArrayList<Projectile>();
+		Game.spritesheet = new Spritesheet("/spritesheet.png");
+		// Possivelmente um resetPlayer aqui!
+		Game.entities.add(Game.player);
+		Game.world = new World("/" + level);
+	}
+
 	public void render(Graphics2D g2d) {
 		int xstart = Camera.x >> 4;
 		int ystart = Camera.y >> 4;

@@ -4,7 +4,6 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -54,16 +53,18 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public static Random rand;
 
 	public UI ui;
-	public Menu menu;
 
-	public static String gameState = "Normal";
+	public Menu menu;
+	//public boolean saveGame = false;
+
+	public static String gameState = "Menu";
 	private static boolean showMessageGameOver = false;
 	private static int framesMessageGameOver = 0;
 	private static boolean restartGame = false;
 
 	
 	public Game() {
-		Sound.musicBackground.loop();
+		//Sound.musicBackground.loop();
 		rand = new Random();
 		addKeyListener(this);
 		addMouseListener(this);
@@ -136,7 +137,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 					CURRENT_LEVEL = 1;
 				}
 				String newWorld = "level" + CURRENT_LEVEL + ".png";
-				World.restartGame(newWorld);
+				World.loadLevel(newWorld);
 			}
 		} else if (gameState == "GameOver") {
 			framesMessageGameOver++;
@@ -166,7 +167,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		g2d.setColor(Color.BLACK);
 		g2d.fillRect(0, 0,WIDTH,HEIGHT);
 
-		if (gameState == "Menu" && !menu.pause) {
+		if (gameState == "Menu" && !Menu.pause) {
 			menu.render(g2d);
 
 			g2d.dispose();
@@ -185,7 +186,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			}
 			ui.render(g2d);
 
-			if(menu.pause) menu.render(g2d);
+			if(Menu.pause) menu.render(g2d);
 			
 			g2d.dispose();
 			g2d = (Graphics2D) bs.getDrawGraphics();
@@ -241,7 +242,9 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			menu.pause = true;
+			Menu.pause = true;
+			Menu.options = Menu.optionsPause;
+			menu.maxOption = Menu.options.length - 1;
 			gameState = "Menu";
 		}
 

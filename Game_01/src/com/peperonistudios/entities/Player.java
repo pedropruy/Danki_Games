@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import com.peperonistudios.graficos.Spritesheet;
 import com.peperonistudios.main.Game;
+import com.peperonistudios.main.Sound;
 import com.peperonistudios.world.Camera;
 import com.peperonistudios.world.World;
 
@@ -13,15 +14,16 @@ public class Player extends Creature {
 	
 	public boolean right, up, down, left;
 
-	private int useSpell = 0, max_spell = 0;
+	private int useSpell = 0;
 	public boolean isCasting = false, nextSpell = false;
-	private boolean gotFireBook = false, gotIceBook = false;
+	private ArrayList<String> knowSpell = new ArrayList<>();
+	public static boolean gotFireBook = false, gotIceBook = false;
 
 	public boolean isCastingMouse = false;
 	public int mx = 0, my = 0;
 
-	public static double max_mana = 40, mana = 0;
-	public static double max_life = 3, life = max_life;
+	public static int max_mana = 40, mana = 0;
+	public static int max_life = 3, life = max_life;
 
 	public boolean jumped = false, isJumping = false;
 	public boolean jumpUp = false, jumpDown = false;
@@ -31,6 +33,10 @@ public class Player extends Creature {
 	
 	public Player(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
+
+		knowSpell.add("basic");
+		if (gotFireBook) knowSpell.add("fire");
+		if (gotIceBook) knowSpell.add("ice");
 
 		this.offsetShadow = 2;
 		
@@ -57,6 +63,7 @@ public class Player extends Creature {
 		if (jumped) {
 			jumped = false;
 			if (isJumping == false) {
+				//Sound.jumpEffect.play();
 				isJumping = true;
 				jumpUp = true;
 			}
@@ -80,7 +87,6 @@ public class Player extends Creature {
 					jumpDown = true;
 				}
 		}
-
 
 		moved = false;
 		if(right && World.isFreeCreature((int)(x + speed),this.getY(), z)) {
@@ -138,18 +144,9 @@ public class Player extends Creature {
 		}
 
 		// Trocar de Magia
-		if (this.nextSpell) {
-			this.nextSpell = false;
-			this.useSpell++;
+		if (this.nextSpell) changeSpell();
 
-			if (mana == 0) 
-				this.useSpell = 0;
-
-			if (this.useSpell > this.max_spell) 
-				this.useSpell = 0;
-		}
-
-		if (!isJumping) castSpell();
+		if (!this.isJumping && !this.isDamaged) castSpell();
 
 		// Game over simples!
 		if (life <= 0) {
@@ -163,6 +160,17 @@ public class Player extends Creature {
 
 		Camera.x = Camera.clamp(this.getX() - (Game.WIDTH/2) + (this.getWidth()/2),0,World.WIDTH*16 - Game.WIDTH);
 		Camera.y = Camera.clamp(this.getY() - (Game.HEIGHT/2) + (this.getHeight()/2),0,World.HEIGHT*16 - Game.HEIGHT);
+	}
+
+	public void changeSpell() {
+		this.nextSpell = false;
+		this.useSpell++;
+
+		if (mana == 0) 
+			this.useSpell = 0;
+
+		if (this.useSpell >= knowSpell.size()) 
+			this.useSpell = 0;
 	}
 
 	public void castSpell() {
@@ -209,26 +217,26 @@ public class Player extends Creature {
 			if (!isDamaged) {
 				Projectile spell = new Projectile(px, py, 8, 8, Entity.BASIC_ATTACK1_EN, Entity.BASIC_ATTACK2_EN,
 										     		      4, 4, 8, 8, dx, dy, 20, angle, 1);
-				switch (useSpell) {
-					case 0:
+				switch (knowSpell.get(useSpell)) {
+					case "basic":
 						// Nada porque já é definido acima
 					break;
 				    
-					case 1:
-						if (mana > 0 && this.gotFireBook) {
+					case "fire":
+						if (mana > 0 && gotFireBook) {
 						spell = new Projectile(px, py, 8, 8, Entity.FIRE_BALL1_EN, Entity.FIRE_BALL2_EN,
 										       3, 3, 10, 11, dx, dy, 30, angle, 5);					
-						mana--;
-						if (mana == 0) this.useSpell = 0;
+						mana-= 2;
+						if (mana <= 0) this.useSpell = 0;
 						} else this.useSpell = 0;
 					break;
 					
-					case 2:
-						if (mana > 0 && this.gotIceBook) {
+					case "ice":
+						if (mana > 0 && gotIceBook) {
 						spell = new Projectile(px, py, 8, 8, Entity.ICE_CRYSTAL1_EN, Entity.ICE_CRYSTAL2_EN,
 										       4, 2, 8, 12, dx, dy, 40, angle, 10);					
-						mana--;
-						if (mana == 0) this.useSpell = 0;
+						mana-= 4;
+						if (mana <= 0) this.useSpell = 0;
 						} else this.useSpell = 0;
 					break;
 				}
@@ -262,16 +270,16 @@ public class Player extends Creature {
 			if (atual instanceof SpellBook) {
 				if (Entity.isColliding(this, atual)) {
 					if (atual.sprite == Entity.FIRE_BOOK_EN) {
-						if (!this.gotFireBook) {
-							this.gotFireBook = true;
-							this.max_spell++;
-							this.useSpell = 1;
+						if (!gotFireBook) {
+							gotFireBook = true;
+							knowSpell.add("fire");
+							this.useSpell++;
 						}
 					} if (atual.sprite == Entity.ICE_BOOK_EN) {
-						if (!this.gotIceBook) {
-							this.gotIceBook = true;
-							this.max_spell++;
-							this.useSpell = 2;
+						if (!gotIceBook) {
+							gotIceBook = true;
+							knowSpell.add("ice");
+							this.useSpell++;
 						}
 					}
 					Game.collectables.remove(i);
@@ -347,16 +355,16 @@ public class Player extends Creature {
 		}
 
 		if (dir != up_dir) {
-			switch (useSpell) {
-				case 0:
+			switch (knowSpell.get(useSpell)) {
+				case "basic":
 					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
 					break;
 
-				case 1:
+				case "fire":
 					g2d.drawImage(Entity.FIRE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
 					break;
 				
-				case 2:
+				case "ice":
 					g2d.drawImage(Entity.ICE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
 				break;
 			

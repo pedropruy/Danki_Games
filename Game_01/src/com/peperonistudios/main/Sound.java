@@ -10,8 +10,9 @@ public class Sound {
 
     private Clip clip;
 
-    public static final Sound musicBackground = new Sound("/music.wav");
-    public static final Sound hurtEffect = new Sound("/hurt.wav");
+    public static final Sound musicBackground = new Sound("music.wav");
+    public static final Sound hurtEffect = new Sound("hitHurt.wav");
+    public static final Sound jumpEffect = new Sound("isJumping.wav");
 
     private Sound(String name) {
         try {

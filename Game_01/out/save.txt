@@ -1,0 +1,5 @@
+level:1
+vida:3
+mana:20
+spell1:1
+spell2:0
