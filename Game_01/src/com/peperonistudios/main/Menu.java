@@ -55,21 +55,25 @@ public class Menu {
                 pause = false;
                 file = new File("save.txt");
                 file.delete();
+
             } else if (options[currentOption].equals("Continuar")) {
                 Game.gameState = "Normal";
                 pause = false;
+
             } else if (options[currentOption].equals("Salvar Jogo")) {
 				String[] opt1 = {"level","vida","mana","spell1","spell2"};
 				int[] opt2 = {Game.CURRENT_LEVEL,Player.life,Player.mana,
-                              Boolean.compare(Player.gotFireBook,false),
-                              Boolean.compare(Player.gotIceBook,false)};
+                              Player.gotFireBook ? 1 : 0,
+                              Player.gotIceBook ? 1 : 0};
 				Menu.saveGame(opt1, opt2, 10);
+
             } else if (options[currentOption].equals("Carregar Jogo")) {
                 file = new File("save.txt");
                 if (file.exists()) {
                     String saver = loadGame(10);
                     applySave(saver);
                 }
+                
             } else if (options[currentOption].equals("Sair")) {
                 System.exit(1);
             }
@@ -79,29 +83,29 @@ public class Menu {
     public static void applySave (String str) {
         String[] spl = str.split("/");
         for (int i = 0; i < spl.length; i++) {
-            String[] spl2 = spl[i].split(":");
+            String[] spl2 = spl[i].split("\\|");
             switch (spl2[0]) {
                 case "level":
                     World.loadLevel("level" + spl2[1] + ".png");
                     Game.gameState = "Normal";
                     pause = false;
-                    break;
+                break;
 
                 case "vida":
                     Player.life = Integer.parseInt(spl2[1]);
-                    break;
+                break;
 
                 case "mane":
                     Player.mana = Integer.parseInt(spl2[1]);
-                    break;
+                break;
 
                 case "spell1":
-                    Player.gotFireBook = Boolean.parseBoolean(spl2[1]);
-                    break;
+                    Player.gotFireBook = spl2[1].equals("1");
+                break;
 
                 case "spell2":
-                    Player.gotIceBook = Boolean.parseBoolean(spl2[1]);
-                    break;
+                    Player.gotIceBook = spl2[1].equals("1");
+                break;
             }
         }
     }
@@ -115,14 +119,14 @@ public class Menu {
                 BufferedReader reader = new BufferedReader(new FileReader("save.txt"));
                 try {
                     while ((singleLine = reader.readLine()) != null) {
-                        String[] trans = singleLine.split(":");
+                        String[] trans = singleLine.split("\\|");
                         char[] val = trans[1].toCharArray();
                         trans[1] = "";
                         for (int i = 0; i < val.length; i++) {
                             val[i] -= encode;
                             trans[1] += val[i];
                         }
-                        line += trans[0] + ":" + trans[1] + "/";
+                        line += trans[0] + "|" + trans[1] + "/";
                     }
                 } catch (IOException e) {}
             } catch (FileNotFoundException e) {}
@@ -141,7 +145,7 @@ public class Menu {
 
         for (int i = 0; i < val1.length; i++) {
             String current = val1[i];
-            current += ":";
+            current += "|";
             char[] value = Integer.toString(val2[i]).toCharArray();
             for (int j = 0; j < value.length; j++) {
                 value[j] += encode;

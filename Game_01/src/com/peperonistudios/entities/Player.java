@@ -16,7 +16,7 @@ public class Player extends Creature {
 
 	private int useSpell = 0;
 	public boolean isCasting = false, nextSpell = false;
-	private ArrayList<String> knowSpell = new ArrayList<>();
+	private static ArrayList<String> knowSpell = new ArrayList<>();
 	public static boolean gotFireBook = false, gotIceBook = false;
 
 	public boolean isCastingMouse = false;
@@ -35,8 +35,6 @@ public class Player extends Creature {
 		super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
 
 		knowSpell.add("basic");
-		if (gotFireBook) knowSpell.add("fire");
-		if (gotIceBook) knowSpell.add("ice");
 
 		this.offsetShadow = 2;
 		
@@ -211,7 +209,10 @@ public class Player extends Creature {
 			}			
 		}
 
+
+
 		if (isCasting || isCastingMouse) {
+		System.out.println(gotFireBook);
 			this.isCasting = false;
 			this.isCastingMouse = false;
 			if (!isDamaged) {
@@ -273,13 +274,13 @@ public class Player extends Creature {
 						if (!gotFireBook) {
 							gotFireBook = true;
 							knowSpell.add("fire");
-							this.useSpell++;
+							this.useSpell = knowSpell.indexOf("fire");
 						}
 					} if (atual.sprite == Entity.ICE_BOOK_EN) {
 						if (!gotIceBook) {
 							gotIceBook = true;
 							knowSpell.add("ice");
-							this.useSpell++;
+							this.useSpell = knowSpell.indexOf("ice");
 						}
 					}
 					Game.collectables.remove(i);
