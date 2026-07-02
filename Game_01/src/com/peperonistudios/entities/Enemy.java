@@ -41,25 +41,25 @@ public class Enemy extends Creature {
 		if (this.life > 0) {
 		if (this.isCollidingWithPlayer() == false) {
 		if (Game.rand.nextInt(100) < 30 && !this.isDamaged) {
-			if ((int)x < Game.player.getX() && World.isFreeCreature((int)(x+speed), this.getY())
+			if ((int)x < Game.player.getX() && World.isFreeCreature((int)(x+speed), this.getY(), 0)
 				&& !isColliding((int)(x+speed), this.getY())) {
 				moved = true;
 				dir = right_dir;
 				x += speed;
 			}
-			else if ((int)x > Game.player.getX() && World.isFreeCreature((int)(x-speed), this.getY())
+			else if ((int)x > Game.player.getX() && World.isFreeCreature((int)(x-speed), this.getY(), 0)
 					&& !isColliding((int)(x-speed), this.getY())) {
 				moved = true;
 				dir = left_dir;
 				x -= speed;
 			}
-			else if ((int)y < Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y+speed))
+			else if ((int)y < Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y+speed), 0)
 					&& !isColliding(this.getX(), (int)(y+speed))) {
 				moved = true;
 				dir = down_dir;
 				y += speed;
 			}
-			else if ((int)y > Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y-speed))
+			else if ((int)y > Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y-speed), 0)
 					&& !isColliding(this.getX(), (int)(y-speed))) {
 				moved = true;
 				dir = up_dir;
@@ -68,7 +68,7 @@ public class Enemy extends Creature {
 		}
 		} else {
 			// Estamos colidindo com o player
-			if(!Game.player.isDamaged) {
+			if(!Game.player.isDamaged && !Game.player.isJumping) {
 				if (Game.rand.nextInt(100) < 10) {
 					Sound.hurtEffect.play();
 					Game.player.isDamaged = true;

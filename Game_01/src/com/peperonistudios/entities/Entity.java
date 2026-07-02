@@ -30,6 +30,7 @@ public class Entity {
 	
 	protected double x;
 	protected double y;
+	protected double z;
 	protected int width;
 	protected int height;
 	
@@ -64,6 +65,10 @@ public class Entity {
 	public void setY(double newY) {
 		this.y = newY;
 	}
+
+	public void setZ(double newZ) {
+		this.y = newZ;
+	}
 	
 	public int getX() {
 		return (int)this.x;
@@ -71,6 +76,10 @@ public class Entity {
 	
 	public int getY() {
 		return (int)this.y;
+	}
+
+	public int getZ() {
+		return (int)this.z;
 	}
 	
 	public int getWidth() {
@@ -87,6 +96,8 @@ public class Entity {
 	public static boolean isColliding (Entity e1, Entity e2) {
 		Rectangle e1Mask = new Rectangle(e1.getX() + e1.maskx, e1.getY() + e1.masky, e1.maskw, e1.maskh);
 		Rectangle e2Mask = new Rectangle(e2.getX() + e2.maskx, e2.getY() + e2.masky, e2.maskw, e2.maskh);
+
+		//if (e1Mask.intersects(e2Mask) && e1.z == e2.z) return true; 
 
 		return e1Mask.intersects(e2Mask);
 	}

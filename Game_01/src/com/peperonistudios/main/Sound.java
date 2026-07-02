@@ -1,38 +1,58 @@
 package com.peperonistudios.main;
 
-import java.applet.Applet;
-import java.applet.AudioClip;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 public class Sound {
 
-    private AudioClip clip;
+    private Clip clip;
 
     public static final Sound musicBackground = new Sound("/music.wav");
     public static final Sound hurtEffect = new Sound("/hurt.wav");
 
-    private Sound (String name) {
+    private Sound(String name) {
         try {
-            clip = Applet.newAudioClip(Sound.class.getResource(name));
-        } catch (Throwable e) {}
+            InputStream is = Sound.class.getResourceAsStream(name);
+            InputStream bufferedIn = new BufferedInputStream(is);
+            AudioInputStream ais = AudioSystem.getAudioInputStream(bufferedIn);
+            
+            clip = AudioSystem.getClip();
+            clip.open(ais);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
     }
 
     public void play() {
+        if (clip == null) return;
         try {
             new Thread() {
                 public void run() {
-                    clip.play();
+                    clip.setFramePosition(0);
+                    clip.start();
                 }
             }.start();
         } catch (Throwable e) {}
     }
 
     public void loop() {
+        if (clip == null) return;
         try {
             new Thread() {
                 public void run() {
-                    clip.loop();
+                    clip.setFramePosition(0);
+                    clip.loop(Clip.LOOP_CONTINUOUSLY);
                 }
             }.start();
         } catch (Throwable e) {}
+    }
+    
+    public void stop() {
+        if (clip != null && clip.isRunning()) {
+            clip.stop();
+        }
     }
 }

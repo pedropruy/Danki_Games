@@ -22,6 +22,12 @@ public class Player extends Creature {
 
 	public static double max_mana = 40, mana = 0;
 	public static double max_life = 3, life = max_life;
+
+	public boolean jumped = false, isJumping = false;
+	public boolean jumpUp = false, jumpDown = false;
+	public int z = 0;
+	public int jumpFrames = 25, currentJumpFrames = 0;
+	public double jumpSpeed = 1;
 	
 	public Player(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
@@ -48,24 +54,52 @@ public class Player extends Creature {
 	}
 
 	public void tick() {
+		if (jumped) {
+			jumped = false;
+			if (isJumping == false) {
+				isJumping = true;
+				jumpUp = true;
+			}
+		}
+
+		if (isJumping) {
+				if (jumpUp) currentJumpFrames += jumpSpeed;
+				else if (jumpDown) {
+					currentJumpFrames -= jumpSpeed;
+					if (currentJumpFrames <= 0) {
+						isJumping = false;
+						jumpDown = false;
+						jumpUp = false;
+						z = 0;
+					}
+				}
+				z = currentJumpFrames;
+				if (currentJumpFrames >= jumpFrames) {
+					isJumping = true;
+					jumpUp = false;
+					jumpDown = true;
+				}
+		}
+
+
 		moved = false;
-		if(right && World.isFreeCreature((int)(x + speed),this.getY())) {
+		if(right && World.isFreeCreature((int)(x + speed),this.getY(), z)) {
 			moved = true;
 			dir = right_dir;
 			x+=speed;
 		}
-		else if (left && World.isFreeCreature((int)(x - speed),this.getY())) {
+		else if (left && World.isFreeCreature((int)(x - speed),this.getY(), z)) {
 			moved = true;
 			dir = left_dir;
 			x-=speed;
 		}
 		
-		else if(up && World.isFreeCreature(this.getX(),(int)(y - speed))) {
+		else if(up && World.isFreeCreature(this.getX(),(int)(y - speed), z)) {
 			moved = true;
 			dir = up_dir;
 			y-=speed;
 		}
-		else if (down && World.isFreeCreature(this.getX(),(int)(y + speed))) {
+		else if (down && World.isFreeCreature(this.getX(),(int)(y + speed), z)) {
 			moved = true;
 			dir = down_dir;
 			y+=speed;
@@ -115,7 +149,7 @@ public class Player extends Creature {
 				this.useSpell = 0;
 		}
 
-		castSpell();
+		if (!isJumping) castSpell();
 
 		// Game over simples!
 		if (life <= 0) {
@@ -125,7 +159,7 @@ public class Player extends Creature {
 			//return;
 		}
 
-		checkCollisionItems();
+		if (!isJumping) checkCollisionItems();
 
 		Camera.x = Camera.clamp(this.getX() - (Game.WIDTH/2) + (this.getWidth()/2),0,World.WIDTH*16 - Game.WIDTH);
 		Camera.y = Camera.clamp(this.getY() - (Game.HEIGHT/2) + (this.getHeight()/2),0,World.HEIGHT*16 - Game.HEIGHT);
@@ -265,7 +299,37 @@ public class Player extends Creature {
 	}
 
 	public void render(Graphics2D g2d) {
-		super.render(g2d);
+        g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + offsetShadow, null);
+
+		// Descobre qual é a sprite atual com base na direção
+    	BufferedImage spriteAtual = null;
+    	if (dir == right_dir) {
+			spriteAtual = rightCreature[index];
+		} else if (dir == left_dir) {
+			spriteAtual = leftCreature[index];
+		} else if (dir == up_dir) {
+			spriteAtual = upCreature[index];
+		} else if (dir == down_dir) {
+			spriteAtual = downCreature[index];
+		}
+
+    	if (spriteAtual == null) return;
+
+    	// Efeito visual com base no estado de dano
+	    if (this.isDamaged) {
+    	    if (this.damageMode == 1) {
+        	    // Desenha a versão totalmente branca
+            	spriteAtual = gersarSpriteBranca(spriteAtual);
+	            g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y - z, null);
+    	    } else if (this.damageMode == 2) {
+        	    // Não desenha nada (totalmente transparente)
+        	} else {
+            	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y - z, null);
+        	}
+	    } else {
+    	    // Caso não tiver levado dano, desenha normalmente
+        	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y - z, null);
+    	}
 
 		render_Magic_Focus(g2d);
 	}
@@ -285,19 +349,19 @@ public class Player extends Creature {
 		if (dir != up_dir) {
 			switch (useSpell) {
 				case 0:
-					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
+					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
 					break;
 
 				case 1:
-					g2d.drawImage(Entity.FIRE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
+					g2d.drawImage(Entity.FIRE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
 					break;
 				
 				case 2:
-					g2d.drawImage(Entity.ICE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
+					g2d.drawImage(Entity.ICE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
 				break;
 			
 				default:
-					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus, null);
+					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
 					break;
 			}
 		}

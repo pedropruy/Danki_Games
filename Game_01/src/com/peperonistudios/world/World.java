@@ -118,7 +118,7 @@ public class World {
 		}
 	}
 
-    public static boolean isFreeCreature(int xnext, int ynext) {
+    public static boolean isFreeCreature(int xnext, int ynext, int zplayer) {
         int pxl_a_menos = 2;
         // Cantos superiores
         int x1 = (xnext+pxl_a_menos) / TILE_SIZE;
@@ -134,14 +134,18 @@ public class World {
         int x4 = (xnext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
         int y4 = (ynext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
 
-        return !((tiles[x1 + (y1*World.WIDTH)] instanceof WallTile) ||
+        if (   !((tiles[x1 + (y1*World.WIDTH)] instanceof WallTile) ||
                  (tiles[x2 + (y2*World.WIDTH)] instanceof WallTile) ||
                  (tiles[x3 + (y3*World.WIDTH)] instanceof WallTile) ||
                  (tiles[x4 + (y4*World.WIDTH)] instanceof WallTile)) &&
                !((tiles[x1 + (y1*World.WIDTH)] instanceof ObstacleTile) ||
                  (tiles[x2 + (y2*World.WIDTH)] instanceof ObstacleTile) ||
                  (tiles[x3 + (y3*World.WIDTH)] instanceof ObstacleTile) ||
-                 (tiles[x4 + (y4*World.WIDTH)] instanceof ObstacleTile));
+                 (tiles[x4 + (y4*World.WIDTH)] instanceof ObstacleTile)))
+            return true;
+        
+        if (zplayer > 0) return true;
+        return false;
     }
 
     public static boolean isFreeProjectile(int xnext, int ynext) {

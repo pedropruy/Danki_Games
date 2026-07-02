@@ -56,7 +56,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public UI ui;
 	public Menu menu;
 
-	public static String gameState = "Menu";
+	public static String gameState = "Normal";
 	private static boolean showMessageGameOver = false;
 	private static int framesMessageGameOver = 0;
 	private static boolean restartGame = false;
@@ -263,6 +263,11 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			if (gameState == "Menu") menu.down = true;
 			else player.down = true;
 		}
+		
+		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+			if (gameState == "GameOver") restartGame = true;
+			else player.jumped = true;
+		}
 
 		if (playerAction) {
 			if (e.getKeyCode() == KeyEvent.VK_C) {
@@ -273,12 +278,6 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			if (e.getKeyCode() == KeyEvent.VK_V) {
 				playerAction = false;
 				player.nextSpell = true;
-			}
-		}
-
-		if (gameState == "GameOver") {
-			if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-				restartGame = true;
 			}
 		}
 
