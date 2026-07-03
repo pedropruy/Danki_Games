@@ -6,13 +6,14 @@ import java.awt.image.BufferedImage;
 import com.peperonistudios.world.Camera;
 
 public class Collectable extends Entity {
+	
+    private int frames = 0, maxFrames = 15, index = 0, maxIndex = 4, offset = 0;
     
 	public Collectable(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw,
             int maskh) {
         super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
     }
 
-    private int frames = 0, maxFrames = 15, index = 0, maxIndex = 4, offset = 0;
 
     public void tick() {
 		frames++;

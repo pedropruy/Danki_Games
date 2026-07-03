@@ -4,6 +4,7 @@ import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -11,6 +12,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -53,9 +56,13 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public static Random rand;
 
 	public UI ui;
+	public InputStream k_stream = ClassLoader.getSystemClassLoader().getResourceAsStream("KiwiSoda.ttf");
+	public static Font kiwi;
+	public InputStream h_stream = ClassLoader.getSystemClassLoader().getResourceAsStream("rainyhearts.ttf");
+	public static Font hearts;
+
 
 	public Menu menu;
-	//public boolean saveGame = false;
 
 	public static String gameState = "Menu";
 	private static boolean showMessageGameOver = false;
@@ -80,7 +87,14 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		spritesheet = new Spritesheet("/spritesheet.png");
 		player = new Player(0,0,16,16,spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
 		entities.add(player);
+		
 		ui = new UI();
+		try {
+			kiwi = Font.createFont(Font.TRUETYPE_FONT, k_stream).deriveFont(16f);
+			hearts = Font.createFont(Font.TRUETYPE_FONT, h_stream).deriveFont(16f);
+		} catch (FontFormatException e) {
+		} catch (IOException e) {}
+
 		world = new World("/level1.png");
 
 		menu = new Menu();
@@ -190,9 +204,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			
 			g2d.dispose();
 			g2d = (Graphics2D) bs.getDrawGraphics();
-			g2d.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
-			// Caso eu queira que a fonte nn use o scale
-		
+			g2d.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);		
 
 			if (gameState == "GameOver") {
 				g2d.setColor(new Color(0,0,0,150));
@@ -242,10 +254,12 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-			Menu.pause = true;
-			Menu.options = Menu.optionsPause;
-			menu.maxOption = Menu.options.length - 1;
-			gameState = "Menu";
+			if (gameState == "Normal") {
+				Menu.pause = true;
+				Menu.options = Menu.optionsPause;
+				menu.maxOption = Menu.options.length - 1;
+				gameState = "Menu";
+			}
 		}
 
 		if(e.getKeyCode() == KeyEvent.VK_RIGHT ||

@@ -19,17 +19,6 @@ public class UI {
             if (i >= Player.life) g2d.drawImage(playerDamaged, 5 + (16*i), 5, null);
             else g2d.drawImage(playerHealthy, 5 + (16*i), 5, null);
         }
-        /*g2d.setColor(Color.GRAY);
-        g2d.fillRect(10, 5, 50, 10);
-
-        if (Player.life/Player.max_life > 0.5) g2d.setColor(Color.GREEN);
-        else if (Player.life/Player.max_life > 0.25) g2d.setColor(Color.YELLOW);
-        else g2d.setColor(Color.RED);
-        g2d.fillRect(10, 5, (int)((Player.life/Player.max_life)*50), 10);
-        
-        g2d.setColor(Color.BLACK);
-        g2d.setFont(new Font("arial", Font.BOLD,8));
-        g2d.drawString((int)Player.life+"/"+(int)Player.max_life,60,15);*/
 
         // Renderizando Barra de Mana
         g2d.setColor(Color.GRAY);
@@ -39,7 +28,7 @@ public class UI {
         g2d.fillRect(9, 26, (int)(((double)Player.mana/(double)Player.max_mana)*40), 5);
         
         g2d.setColor(Color.BLACK);
-        g2d.setFont(new Font("arial", Font.BOLD,8));
-        g2d.drawString(Player.mana+"/"+Player.max_mana,17,31);
+        g2d.setFont(Game.hearts);
+        g2d.drawString(Player.mana+"/"+Player.max_mana,13,33);
     }
 }

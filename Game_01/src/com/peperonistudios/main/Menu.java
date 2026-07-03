@@ -171,20 +171,19 @@ public class Menu {
 
     // Desenhando título
     g2d.setColor(Color.YELLOW);
-    Font titleFont = new Font("arial", Font.BOLD, 15);
+    Font titleFont = Game.kiwi.deriveFont(16.0f);
     g2d.setFont(titleFont);
-    drawCenteredString(g2d, "The Legend of Karma", titleFont, 45);
+    drawCenteredString(g2d, "The Legend of Karma", titleFont, 65);
 
     // Desenhando as opções
     g2d.setColor(Color.WHITE);
-    Font menuFont = new Font("arial", Font.PLAIN, 10);
-    g2d.setFont(menuFont);
+    g2d.setFont(Game.hearts);
 
     int y = 115;
     for (int i = 0; i < options.length; i++) {
         if (options[currentOption].equals(options[i])) 
-            drawCenteredString(g2d, ">  " + options[i] + "  <", menuFont, y+(20*i));
-        else drawCenteredString(g2d, options[i], menuFont, y+(20*i));
+            drawCenteredString(g2d, ">  " + options[i] + "  <", Game.hearts, y+(20*i));
+        else drawCenteredString(g2d, options[i], Game.hearts, y+(20*i));
     }
 }
 

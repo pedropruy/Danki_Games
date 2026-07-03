@@ -17,12 +17,12 @@ public class Projectile extends Entity{
 
     private int duration = 0, max_duration = 20;
 
-	private BufferedImage[] projectileSprite;
+    private BufferedImage[] projectileSprite;
     private double rotation_angle = 0;
-	private int frames = 0, maxFrames = 2, index = 0, maxIndex = 1;
+	private int index = 0;
 
-    public Projectile(int x, int y, int width, int height, BufferedImage sprite1,
-                      BufferedImage sprite2, int maskx, int masky, int maskw, int maskh,
+    public Projectile(int x, int y, int width, int height, String magicName,
+                      int maskx, int masky, int maskw, int maskh,
                       double dx, double dy, int max_duration, double angle, int damage) {
 		super(x, y, width, height, null, maskx, masky, maskw, maskh);
 
@@ -31,10 +31,26 @@ public class Projectile extends Entity{
         this.dx = dx;
         this.dy = dy;
         this.max_duration = max_duration;
-        
-		projectileSprite = new BufferedImage[2];
-        this.projectileSprite[0] = sprite1;
-        this.projectileSprite[1] = sprite2;
+
+        projectileSprite = new BufferedImage[2];
+        switch (magicName) {
+            case "basic":
+                projectileSprite = Entity.BASIC_ATTACK_EN;
+            break;
+            
+            case "fire":
+                projectileSprite = Entity.FIRE_BALL_EN;
+            break;
+
+            case "ice":
+                projectileSprite = Entity.ICE_CRYSTAL_EN;
+            break;
+
+            default:
+                projectileSprite = Entity.BASIC_ATTACK_EN;
+            break;
+        }
+    
         this.rotation_angle = angle;
 	}
 
@@ -51,16 +67,8 @@ public class Projectile extends Entity{
             Game.projectiles.remove(this);
             return;
         }
-
-
-		frames++;
-		if(frames == maxFrames) {
-			frames = 0;
-			index++;
-			if(index > maxIndex) {
-				index = 0;
-			}
-		}
+        if (duration >= 10) index = 0;
+        else index = 1;
     }
 
     public void render(Graphics2D g2d) {

@@ -14,9 +14,9 @@ public class Player extends Creature {
 	
 	public boolean right, up, down, left;
 
-	private int useSpell = 0;
+	public int useSpell = 0;
 	public boolean isCasting = false, nextSpell = false;
-	private static ArrayList<String> knowSpell = new ArrayList<>();
+	public static ArrayList<String> knowSpell = new ArrayList<>();
 	public static boolean gotFireBook = false, gotIceBook = false;
 
 	public boolean isCastingMouse = false;
@@ -30,6 +30,8 @@ public class Player extends Creature {
 	public int z = 0;
 	public int jumpFrames = 25, currentJumpFrames = 0;
 	public double jumpSpeed = 1;
+
+	MagicFocus mf;
 	
 	public Player(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
@@ -55,9 +57,15 @@ public class Player extends Creature {
 		for(int i = 0; i < 2; i++) {
 			downCreature[i] = Game.spritesheet.getSprite(0+(i*16), 0, 16, 16);
 		}
+
+		
+        this.mf = new MagicFocus(this.getX(), this.getY(), 8, 8, null, 1, 1, 6, 6, this);
+        //Game.entities.add(mf);
 	}
 
 	public void tick() {
+		this.mf.tick();
+
 		if (jumped) {
 			jumped = false;
 			if (isJumping == false) {
@@ -212,12 +220,11 @@ public class Player extends Creature {
 
 
 		if (isCasting || isCastingMouse) {
-		System.out.println(gotFireBook);
 			this.isCasting = false;
 			this.isCastingMouse = false;
 			if (!isDamaged) {
-				Projectile spell = new Projectile(px, py, 8, 8, Entity.BASIC_ATTACK1_EN, Entity.BASIC_ATTACK2_EN,
-										     		      4, 4, 8, 8, dx, dy, 20, angle, 1);
+				Projectile spell = new Projectile(px, py, 8, 8, "basic", 4, 4,
+												  8, 8, dx, dy, 20, angle, 1);
 				switch (knowSpell.get(useSpell)) {
 					case "basic":
 						// Nada porque já é definido acima
@@ -225,8 +232,8 @@ public class Player extends Creature {
 				    
 					case "fire":
 						if (mana > 0 && gotFireBook) {
-						spell = new Projectile(px, py, 8, 8, Entity.FIRE_BALL1_EN, Entity.FIRE_BALL2_EN,
-										       3, 3, 10, 11, dx, dy, 30, angle, 5);					
+						spell = new Projectile(px, py, 8, 8, "fire", 3, 3,
+											   10, 11, dx, dy, 30, angle, 5);					
 						mana-= 2;
 						if (mana <= 0) this.useSpell = 0;
 						} else this.useSpell = 0;
@@ -234,8 +241,8 @@ public class Player extends Creature {
 					
 					case "ice":
 						if (mana > 0 && gotIceBook) {
-						spell = new Projectile(px, py, 8, 8, Entity.ICE_CRYSTAL1_EN, Entity.ICE_CRYSTAL2_EN,
-										       4, 2, 8, 12, dx, dy, 40, angle, 10);					
+						spell = new Projectile(px, py, 8, 8, "ice", 4, 2,
+											   8, 12, dx, dy, 40, angle, 10);					
 						mana-= 4;
 						if (mana <= 0) this.useSpell = 0;
 						} else this.useSpell = 0;
@@ -310,7 +317,6 @@ public class Player extends Creature {
 	public void render(Graphics2D g2d) {
         g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + offsetShadow, null);
 
-		// Descobre qual é a sprite atual com base na direção
     	BufferedImage spriteAtual = null;
     	if (dir == right_dir) {
 			spriteAtual = rightCreature[index];
@@ -340,39 +346,7 @@ public class Player extends Creature {
         	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y - z, null);
     	}
 
-		render_Magic_Focus(g2d);
-	}
-
-	private void render_Magic_Focus(Graphics2D g2d) {
-		int xFocus = 0, yFocus = 0;
-    	if (dir == right_dir) {
-			xFocus = 13; yFocus = 7;
-		} else if (dir == left_dir) {
-			xFocus = -5; yFocus = 7;
-		} else if (dir == up_dir) {
-			xFocus = 4; yFocus = -2;
-		} else if (dir == down_dir) {
-			xFocus = 4; yFocus = 9;
-		}
-
-		if (dir != up_dir) {
-			switch (knowSpell.get(useSpell)) {
-				case "basic":
-					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
-					break;
-
-				case "fire":
-					g2d.drawImage(Entity.FIRE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
-					break;
-				
-				case "ice":
-					g2d.drawImage(Entity.ICE_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
-				break;
-			
-				default:
-					g2d.drawImage(Entity.MAGIC_FOCUS_EN, this.getX() - Camera.x + xFocus, this.getY() - Camera.y + yFocus - z, null);
-					break;
-			}
-		}
+		this.mf.render(g2d);
+		//render_Magic_Focus(g2d);
 	}
 }
