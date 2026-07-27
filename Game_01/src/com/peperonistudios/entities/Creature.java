@@ -1,21 +1,29 @@
 package com.peperonistudios.entities;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+
+import java.util.List;
 
 import com.peperonistudios.main.Game;
 import com.peperonistudios.world.Camera;
+import com.peperonistudios.world.Vector2i;
+import com.peperonistudios.world.Node;
 
 public class Creature extends Entity{
 
 	public int right_dir = 0, left_dir = 1, up_dir = 2, down_dir = 3;
 	public int dir = down_dir;
+
+	protected List<Node> path;
 	public double speed = 1;
 
     protected int frames = 0, maxFrames = 15, index = 0, maxIndex = 1;
 	protected boolean moved = false;
-	protected BufferedImage[] rightCreature;
-	protected BufferedImage[] leftCreature;
+	protected BufferedImage[] sideCreature;
 	protected BufferedImage[] upCreature;
 	protected BufferedImage[] downCreature;
     protected int offsetShadow = 0;
@@ -25,24 +33,86 @@ public class Creature extends Entity{
 	// 0 = Normal, 1 = Branco, 2 = Transparente
 	protected int damageMode = 0;
 
+
     public Creature(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw,
             int maskh) {
         super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
     }
 
+	public boolean isColliding (int xnext, int ynext) {
+		Rectangle enemyCurrent = new Rectangle(xnext + maskx, ynext + masky, maskw, maskh);
+		for (int i = 0; i < Game.enemies.size(); i++) {
+			Enemy e = Game.enemies.get(i);
+			if (e == this) continue;
+			
+			Rectangle targetEnemy = new Rectangle(e.getX() + maskx, e.getY() + masky, maskw, maskh);
+			if(enemyCurrent.intersects(targetEnemy)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static double calculateDistance (Entity e1, Entity e2) {
+		int x1 = e1.getX(), y1 = e1.getY();
+		int x2 = e2.getX(), y2 = e2.getY();
+		return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));		
+	}
+
+	public static double calculateDistance (int x1, int y1, Entity e2) {
+		int x2 = e2.getX(), y2 = e2.getY();
+		return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));		
+	}
+
 	protected void destroySelf () {
+	}
+
+	public void followPath(List<Node> path) {
+		if (path != null) {
+			if (path.size() > 0) {
+				Vector2i target = path.get(path.size() - 1).tile;
+				// O A* analiza por tile e não por pixel
+				if (x < target.x*16 && !isColliding((int)(x+speed), this.getY())) {
+					x += speed;
+					dir = right_dir;
+					moved = true;
+				} else if (x > target.x*16 && !isColliding((int)(x-speed), this.getY())) { 
+					x -= speed;
+					dir = left_dir;
+					moved = true;
+				} else if (y < target.y*16 && !isColliding(this.getX(), (int)(y-speed))) {
+					y += speed;
+					dir = down_dir;
+					moved = true;
+				} else if (y > target.y*16 && !isColliding(this.getX(), (int)(y-speed))) {
+					y -= speed;
+					dir = up_dir;
+					moved = true;
+				}
+
+				if (x == target.x*16 && y == target.y*16)
+					path.remove(path.size() - 1);
+			}
+		}
 	}
     
     public void render(Graphics2D g2d) {
         g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + offsetShadow, null);
 
+
 		// Descobre qual é a sprite atual com base na direção
     	BufferedImage spriteAtual = null;
     	if (dir == right_dir) {
-			spriteAtual = rightCreature[index];
+			// Forma de inverter a imagem horizontalmente
+			spriteAtual = sideCreature[index];
+			AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+    		tx.translate(-spriteAtual.getWidth(), 0);
+    
+    		AffineTransformOp op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
+			spriteAtual = op.filter(spriteAtual, null);
 		} else if (dir == left_dir) {
-			spriteAtual = leftCreature[index];
-		} else if (dir == up_dir) {
+			spriteAtual = sideCreature[index];
+		}else if (dir == up_dir) {
 			spriteAtual = upCreature[index];
 		} else if (dir == down_dir) {
 			spriteAtual = downCreature[index];
@@ -55,15 +125,15 @@ public class Creature extends Entity{
     	    if (this.damageMode == 1) {
         	    // Desenha a versão totalmente branca
             	spriteAtual = gersarSpriteBranca(spriteAtual);
-	            g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+	            g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y - this.getZ(), null);
     	    } else if (this.damageMode == 2) {
         	    // Não desenha nada (totalmente transparente)
         	} else {
-            	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+            	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y - this.getZ(), null);
         	}
 	    } else {
     	    // Caso não tiver levado dano, desenha normalmente
-        	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y, null);
+        	g2d.drawImage(spriteAtual, this.getX() - Camera.x, this.getY() - Camera.y - this.getZ(), null);
     	}
     }
 

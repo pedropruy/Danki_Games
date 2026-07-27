@@ -12,21 +12,25 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import com.peperonistudios.entities.Entity;
 import com.peperonistudios.entities.Collectable;
+import com.peperonistudios.entities.Creature;
 import com.peperonistudios.entities.Enemy;
 import com.peperonistudios.entities.Player;
 import com.peperonistudios.entities.Projectile;
 import com.peperonistudios.graficos.Spritesheet;
 import com.peperonistudios.graficos.UI;
+import com.peperonistudios.world.Camera;
 import com.peperonistudios.world.World;
 
 public class Game extends Canvas implements Runnable, KeyListener, MouseListener {
@@ -38,6 +42,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public static final int WIDTH = 240;
 	public static final int HEIGHT = 240;
 	public static final int SCALE = 3;
+	public static final int SIMULATION_DISTANCE = 10*16;
 	public static int CURRENT_LEVEL = 1, MAX_LEVEL = 2;
 	
 	private BufferedImage image;
@@ -61,6 +66,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public InputStream h_stream = ClassLoader.getSystemClassLoader().getResourceAsStream("rainyhearts.ttf");
 	public static Font hearts;
 
+	public static int[] screenPixels;
 
 	public Menu menu;
 
@@ -79,6 +85,8 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		initFrame();
 		//Inicializando objetos
 		image = new BufferedImage(WIDTH,HEIGHT,BufferedImage.TYPE_INT_RGB);
+		screenPixels = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
+				
 		entities = new ArrayList<Entity>();
 		enemies = new ArrayList<Enemy>();
 		collectables = new ArrayList<Collectable>();
@@ -89,6 +97,8 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		entities.add(player);
 		
 		ui = new UI();
+		//ui.createLightmap("/lightmap.png");
+
 		try {
 			kiwi = Font.createFont(Font.TRUETYPE_FONT, k_stream).deriveFont(16f);
 			hearts = Font.createFont(Font.TRUETYPE_FONT, h_stream).deriveFont(16f);
@@ -137,8 +147,13 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			menu.tick();
 		} else if (gameState == "Normal") {
 			restartGame = false;
+
+			// Rodando o tick apenas das entidades dentro da distância de simulação
 			for (int i = 0; i < entities.size(); i++) {
-				entities.get(i).tick();
+				if (entities.get(i) instanceof Player ||
+					Creature.calculateDistance(Camera.x + WIDTH/2, Camera.y + HEIGHT/2,
+					entities.get(i)) < SIMULATION_DISTANCE)
+					entities.get(i).tick();
 			}
 
 			for (int i = 0; i < projectiles.size(); i++) {
@@ -190,14 +205,20 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		} else {		
 			world.render(g2d);
 		
+			// Renderizando apenas o que está dentro da distância de simulação
 			for(int i = 0; i < entities.size(); i++) {
-				Entity e = entities.get(i);
-				e.render(g2d);
+				if (entities.get(i) instanceof Player ||
+					Creature.calculateDistance(Camera.x + WIDTH/2, Camera.y + HEIGHT/2,
+					entities.get(i)) < SIMULATION_DISTANCE)
+					entities.get(i).render(g2d);
 			}
 
 			for (int i = 0; i < projectiles.size(); i++) {
 				projectiles.get(i).render(g2d);
 			}
+
+			//applyLight();
+
 			ui.render(g2d);
 
 			if(Menu.pause) menu.render(g2d);
@@ -219,6 +240,18 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		}
 		bs.show();
 	}
+
+	/*public void drawRectangleExemple(int xoff, int yoff) {
+		for (int xx = 0; xx < 32; xx++) {
+			for (int yy = 0; yy < 32; yy++) {
+				int xOff = xx + xoff;
+				int yOff = yy + yoff;
+				if (xOff < 0 || yOff < 0 || xOff >= WIDTH || yOff >= HEIGHT)
+					continue;
+				pixels[xOff + (yOff*WIDTH)] = 0xff0000;
+			}
+		}
+	}*/
 	
 	public void run() {
 		long lastTime = System.nanoTime();

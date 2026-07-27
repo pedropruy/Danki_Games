@@ -55,7 +55,7 @@ public class World {
             case 0xFFFF9854:
                 tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_BRIDGEV);
                 break;
-            case 0xFFF76200:
+            case 0xFFD37C45:
                 tiles[xx + (yy * WIDTH)] = new FloorTile(xx * 16, yy * 16, Tile.TILE_BRIDGEH);
                 break;
             case 0xFFAD7B00:
@@ -164,10 +164,14 @@ public class World {
         int x4 = (xnext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
         int y4 = (ynext+TILE_SIZE-1-pxl_a_menos) / TILE_SIZE;
 
-        return !((tiles[x1 + (y1*World.WIDTH)] instanceof WallTile) ||
-                 (tiles[x2 + (y2*World.WIDTH)] instanceof WallTile) ||
-                 (tiles[x3 + (y3*World.WIDTH)] instanceof WallTile) ||
-                 (tiles[x4 + (y4*World.WIDTH)] instanceof WallTile));
+        return !((tiles[x1 + (y1*World.WIDTH)] instanceof WallTile
+             && !(tiles[x1 + (y1*World.WIDTH)] instanceof ObstacleTile)) ||
+                 (tiles[x2 + (y2*World.WIDTH)] instanceof WallTile
+             && !(tiles[x2 + (y2*World.WIDTH)] instanceof ObstacleTile)) ||
+                 (tiles[x3 + (y3*World.WIDTH)] instanceof WallTile
+             && !(tiles[x3 + (y3*World.WIDTH)] instanceof ObstacleTile)) ||
+                 (tiles[x4 + (y4*World.WIDTH)] instanceof WallTile
+             && !(tiles[x4 + (y4*World.WIDTH)] instanceof ObstacleTile)));
     }
 
     public static void restartGame (String level) {

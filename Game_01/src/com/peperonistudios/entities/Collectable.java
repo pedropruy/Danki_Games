@@ -44,7 +44,7 @@ public class Collectable extends Entity {
 		}
 	}
 
-    public void render(Graphics2D g2d) {
+	public void render(Graphics2D g2d) {
 		g2d.drawImage(Entity.GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + 2, null);
 		g2d.drawImage(sprite, this.getX() - Camera.x, this.getY() - Camera.y - offset, null);
 	

@@ -1,7 +1,6 @@
 package com.peperonistudios.graficos;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -12,6 +11,12 @@ public class UI {
 
 	private static BufferedImage playerHealthy = Game.spritesheet.getSprite(128, 32, 16, 16);
 	private static BufferedImage playerDamaged = Game.spritesheet.getSprite(144, 32, 16, 16);
+
+    private Lightmap lightmap = null;
+
+    public void createLightmap(String path) {
+        lightmap = new Lightmap(path);
+    }
     
     public void render(Graphics2D g2d) {
         // Renderizando Barra de Vida
@@ -30,5 +35,7 @@ public class UI {
         g2d.setColor(Color.BLACK);
         g2d.setFont(Game.hearts);
         g2d.drawString(Player.mana+"/"+Player.max_mana,13,33);
+
+        if (lightmap != null) lightmap.applyLight();
     }
 }

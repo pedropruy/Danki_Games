@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 
 import com.peperonistudios.main.Game;
 import com.peperonistudios.main.Sound;
+import com.peperonistudios.world.AStar;
+import com.peperonistudios.world.Vector2i;
 import com.peperonistudios.world.World;
 
 public class Enemy extends Creature {
@@ -15,67 +17,27 @@ public class Enemy extends Creature {
 	public Enemy(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, null, maskx, masky, maskw, maskh);
 		
+		this.speed = 0.5;
+
 		// Tem que trocar isto caso for fazer outro inimigo
 		this.setMask(2, 3, 13, 11);
 
-		rightCreature = new BufferedImage[2];
-		leftCreature = new BufferedImage[2];
+		sideCreature = new BufferedImage[2];
 		upCreature = new BufferedImage[2];
 		downCreature = new BufferedImage[2];
 
 		for(int i = 0; i < 2; i++) {
-			rightCreature[i] = Game.spritesheet.getSprite(96+(i*16), 32, 16, 16);
-		}
-		for(int i = 0; i < 2; i++) {
-			leftCreature[i] = Game.spritesheet.getSprite(64+(i*16), 32, 16, 16);
-		}
-		for(int i = 0; i < 2; i++) {
+			sideCreature[i] = Game.spritesheet.getSprite(64+(i*16), 32, 16, 16);
 			upCreature[i] = Game.spritesheet.getSprite(32+(i*16), 32, 16, 16);
-		}
-		for(int i = 0; i < 2; i++) {
 			downCreature[i] = Game.spritesheet.getSprite(0+(i*16), 32, 16, 16);
 		}
 	}
 
 	public void tick () {
 		if (this.life > 0) {
-		if (this.isCollidingWithPlayer() == false) {
-		if (Game.rand.nextInt(100) < 30 && !this.isDamaged) {
-			if ((int)x < Game.player.getX() && World.isFreeCreature((int)(x+speed), this.getY(), 0)
-				&& !isColliding((int)(x+speed), this.getY())) {
-				moved = true;
-				dir = right_dir;
-				x += speed;
-			}
-			else if ((int)x > Game.player.getX() && World.isFreeCreature((int)(x-speed), this.getY(), 0)
-					&& !isColliding((int)(x-speed), this.getY())) {
-				moved = true;
-				dir = left_dir;
-				x -= speed;
-			}
-			else if ((int)y < Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y+speed), 0)
-					&& !isColliding(this.getX(), (int)(y+speed))) {
-				moved = true;
-				dir = down_dir;
-				y += speed;
-			}
-			else if ((int)y > Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y-speed), 0)
-					&& !isColliding(this.getX(), (int)(y-speed))) {
-				moved = true;
-				dir = up_dir;
-				y -= speed;
-			}	
-		}
-		} else {
-			// Estamos colidindo com o player
-			if(!Game.player.isDamaged && !Game.player.isJumping) {
-				if (Game.rand.nextInt(100) < 10) {
-					//Sound.hurtEffect.play();
-					Game.player.isDamaged = true;
-					Player.life--;
-				}
-			}
-		}
+			
+		//enemyMovement_basic();
+		enemyMovement_advenced();
 		
 		if(moved) {
 			frames++;
@@ -132,6 +94,66 @@ public class Enemy extends Creature {
 		}
 	}
 
+	private void enemyMovement_basic() {
+		if (this.isCollidingWithPlayer() == false) {
+		if (Game.rand.nextInt(100) < 30 && !this.isDamaged) {
+			if ((int)x < Game.player.getX() && World.isFreeCreature((int)(x+speed), this.getY(), 0)
+				&& !isColliding((int)(x+speed), this.getY())) {
+				moved = true;
+				dir = right_dir;
+				x += speed;
+			}
+			else if ((int)x > Game.player.getX() && World.isFreeCreature((int)(x-speed), this.getY(), 0)
+					&& !isColliding((int)(x-speed), this.getY())) {
+				moved = true;
+				dir = left_dir;
+				x -= speed;
+			}
+			else if ((int)y < Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y+speed), 0)
+					&& !isColliding(this.getX(), (int)(y+speed))) {
+				moved = true;
+				dir = down_dir;
+				y += speed;
+			}
+			else if ((int)y > Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y-speed), 0)
+					&& !isColliding(this.getX(), (int)(y-speed))) {
+				moved = true;
+				dir = up_dir;
+				y -= speed;
+			}	
+		}
+		} else {
+			// Estamos colidindo com o player
+			if(!Game.player.isDamaged && !Game.player.isJumping) {
+				if (Game.rand.nextInt(100) < 10) {
+					//Sound.hurtEffect.play();
+					Game.player.isDamaged = true;
+					Player.life--;
+				}
+			}
+		}
+	}
+
+	private void enemyMovement_advenced() {
+		if (!isCollidingWithPlayer()) {
+			if (path == null || path.size() == 0 || Game.player.moved) {
+				Vector2i start = new Vector2i(this.getX()/16, this.getY()/16);
+				Vector2i end = new Vector2i((Game.player.getX()+8)/16, (Game.player.getY()+8)/16);
+				path = AStar.findPath(Game.world, start, end);
+			}
+		} else {
+			if(!Game.player.isDamaged && !Game.player.isJumping) {
+				if (Game.rand.nextInt(100) < 10) {
+					//Sound.hurtEffect.play();
+					Game.player.isDamaged = true;
+					Player.life--;
+				}
+			}  
+		}
+		if (!this.isDamaged)
+			followPath(path);
+	}
+
 	public boolean isCollidingWithPlayer() {
 		Rectangle enemyCurrent = new Rectangle(this.getX() + maskx, this.getY() + masky, maskw, maskh);
 		Rectangle player = new Rectangle(Game.player.getX(), Game.player.getY(), 16, 16);
@@ -139,28 +161,16 @@ public class Enemy extends Creature {
 		return enemyCurrent.intersects(player);
 	}
 
-	public boolean isColliding (int xnext, int ynext) {
-		Rectangle enemyCurrent = new Rectangle(xnext + maskx, ynext + masky, maskw, maskh);
-		for (int i = 0; i < Game.enemies.size(); i++) {
-			Enemy e = Game.enemies.get(i);
-			if (e == this) continue;
-			
-			Rectangle targetEnemy = new Rectangle(e.getX() + maskx, e.getY() + masky, maskw, maskh);
-			if(enemyCurrent.intersects(targetEnemy)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	public boolean isCollidingWithProjectiles() {
 		for (int i = 0; i < Game.projectiles.size(); i++) {
 			Projectile e = Game.projectiles.get(i);
 			
-			if (Entity.isColliding(this, e) && !isDamaged) {
+			if (Entity.isColliding(this, e)) {
 				//Sound.hurtEffect.play();
-				life -= e.damage;
-				this.isDamaged = true;
+				if (!isDamaged) {
+					life -= e.damage;
+					this.isDamaged = true;
+				} 
 				Game.projectiles.remove(e);
 			}
 		}

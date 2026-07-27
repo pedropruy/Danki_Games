@@ -41,6 +41,7 @@ public class Entity {
 	public Entity(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
 		this.x = x;
 		this.y = y;
+		this.z = 0;
 		this.width = width;
 		this.height = height;
 		this.sprite = sprite;
@@ -67,7 +68,7 @@ public class Entity {
 	}
 
 	public void setZ(double newZ) {
-		this.y = newZ;
+		this.z = newZ;
 	}
 	
 	public int getX() {
@@ -102,7 +103,6 @@ public class Entity {
 		return e1Mask.intersects(e2Mask);
 	}
 
-	
 	public void render(Graphics2D g2d) {
-	}
+    }
 }
