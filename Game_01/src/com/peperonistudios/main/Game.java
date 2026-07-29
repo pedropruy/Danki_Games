@@ -2,10 +2,14 @@ package com.peperonistudios.main;
 
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -105,6 +109,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		} catch (IOException e) {}
 
 		world = new World("/level1.png");
+		//world = new World();
 
 		ui = new UI();
 		//ui.createLightmap("/lightmap.png");
@@ -120,6 +125,21 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		frame.add(this);
 		frame.setResizable(false);
 		frame.pack();
+
+		// Icone de Janela
+		Image image = null;
+		try {
+			image = ImageIO.read(getClass().getResource("/icon.png"));
+		} catch (IOException e) { e.printStackTrace(); }
+		frame.setIconImage(image);
+
+		Toolkit toolkit = Toolkit.getDefaultToolkit(); 
+		image = toolkit.getImage(getClass().getResource("/cursor.png"));
+		// Point(0, 0) é a origem do cursor, ou seja, a ponta do cursor será em (0, 0) 
+		Cursor cursor = toolkit.createCustomCursor(image, new Point(22, 22), "img");
+		frame.setCursor(cursor);
+
+		frame.setAlwaysOnTop(true);
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
@@ -165,7 +185,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 				projectiles.get(i).tick();
 			}
 
-			if (enemies.size() == 0) {
+			if (enemies.size() <= 0) {
 				CURRENT_LEVEL++;
 				if (CURRENT_LEVEL > MAX_LEVEL) {
 					CURRENT_LEVEL = 1;

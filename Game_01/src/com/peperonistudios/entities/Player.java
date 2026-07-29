@@ -248,22 +248,29 @@ public class Player extends Creature {
 	public void checkCollisionItems () {
 		for (int i = 0; i < Game.collectables.size(); i++) {
 			Entity atual = Game.collectables.get(i);
-			// Colisão com elixir da vida
-			if (atual instanceof LifeElixir) {
+			// Colisão com elixires
+			if (atual instanceof Elixir) {
 				if (Entity.isColliding(this, atual)) {
-					life += 2;
-					if (life > max_life) life = max_life;
-					Game.collectables.remove(i);
-					Game.entities.remove(atual);
-				}
-			}
-			// Colisão com elixir de mana
-			if (atual instanceof ManaElixir) {
-				if (Entity.isColliding(this, atual)) {
-					mana += 10;
-					if (mana > max_mana) mana = max_mana;
-					Game.collectables.remove(i);
-					Game.entities.remove(atual);
+					if (atual.sprite == Entity.LIFE_ELIXIR_EN) {
+						life += 1;
+						if (life > max_life) life = max_life;
+						Game.collectables.remove(i);
+						Game.entities.remove(atual);
+					} if (atual.sprite == Entity.BIGGER_LIFE_ELIXIR_EN) {
+						life = max_life;
+						Game.collectables.remove(i);
+						Game.entities.remove(atual);
+					} if (atual.sprite == Entity.MANA_ELIXIR_EN) {
+						mana += 10;
+						if (mana > max_mana) mana = max_mana;
+						Game.collectables.remove(i);
+						Game.entities.remove(atual);
+					} if (atual.sprite == Entity.BIGGER_MANA_ELIXIR_EN) {
+						mana = max_mana;
+						Game.collectables.remove(i);
+						Game.entities.remove(atual);
+					}
+
 				}
 			}
 			// Colisão com livros de magia

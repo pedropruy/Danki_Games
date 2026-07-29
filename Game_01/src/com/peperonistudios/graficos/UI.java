@@ -13,6 +13,9 @@ public class UI {
 
 	private static BufferedImage playerHealthy = Game.spritesheet.getSprite(128, 32, 16, 16);
 	private static BufferedImage playerDamaged = Game.spritesheet.getSprite(144, 32, 16, 16);
+
+	private static BufferedImage speelBook = Game.spritesheet.getSprite(0, 64, 32, 16);
+	private static BufferedImage iconFire = Game.spritesheet.getSprite(32, 64, 16, 16);
    
 	public static BufferedImage minimap = null;
     public static int[] minimapPixels;
@@ -46,11 +49,16 @@ public class UI {
         g2d.setFont(Game.hearts);
         g2d.drawString(Player.mana+"/"+Player.max_mana,13,33);
 
-        // Minimapa
+        // Renderizando Minimapa
         if (minimap != null) {
             World.renderMinimap();
             g2d.drawImage(minimap, Game.WIDTH - minimap.getWidth() - 5, 5, null);
         }
+
+        // Renderizando Magia
+        g2d.drawImage(speelBook, 64, 8, null);
+        g2d.drawImage(iconFire, 72, 3, null);
+
 
         if (lightmap != null) lightmap.applyLight();
     }

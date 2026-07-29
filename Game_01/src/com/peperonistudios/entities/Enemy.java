@@ -93,32 +93,32 @@ public class Enemy extends Creature {
 
 	private void enemyMovement_basic() {
 		if (this.isCollidingWithPlayer() == false) {
-		if (Game.rand.nextInt(100) < 30 && !this.isDamaged) {
-			if ((int)x < Game.player.getX() && World.isFreeCreature((int)(x+speed), this.getY(), 0)
-				&& !isColliding((int)(x+speed), this.getY())) {
-				moved = true;
-				dir = right_dir;
-				x += speed;
+			if (Game.rand.nextInt(100) < 30) {
+				if ((int)x < Game.player.getX() && World.isFreeCreature((int)(x+speed), this.getY(), 0)
+					&& !isColliding((int)(x+speed), this.getY())) {
+					moved = true;
+					dir = right_dir;
+					x += speed;
+				}
+				else if ((int)x > Game.player.getX() && World.isFreeCreature((int)(x-speed), this.getY(), 0)
+						&& !isColliding((int)(x-speed), this.getY())) {
+					moved = true;
+					dir = left_dir;
+					x -= speed;
+				}
+				else if ((int)y < Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y+speed), 0)
+						&& !isColliding(this.getX(), (int)(y+speed))) {
+					moved = true;
+					dir = down_dir;
+					y += speed;
+				}
+				else if ((int)y > Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y-speed), 0)
+						&& !isColliding(this.getX(), (int)(y-speed))) {
+					moved = true;
+					dir = up_dir;
+					y -= speed;
+				}	
 			}
-			else if ((int)x > Game.player.getX() && World.isFreeCreature((int)(x-speed), this.getY(), 0)
-					&& !isColliding((int)(x-speed), this.getY())) {
-				moved = true;
-				dir = left_dir;
-				x -= speed;
-			}
-			else if ((int)y < Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y+speed), 0)
-					&& !isColliding(this.getX(), (int)(y+speed))) {
-				moved = true;
-				dir = down_dir;
-				y += speed;
-			}
-			else if ((int)y > Game.player.getY() && World.isFreeCreature(this.getX(), (int)(y-speed), 0)
-					&& !isColliding(this.getX(), (int)(y-speed))) {
-				moved = true;
-				dir = up_dir;
-				y -= speed;
-			}	
-		}
 		} else {
 			// Estamos colidindo com o player
 			if(!Game.player.isDamaged && !Game.player.isJumping) {
@@ -141,15 +141,14 @@ public class Enemy extends Creature {
 		} else {
 			// Colidindo com o Jogador
 			if(!Game.player.isDamaged && !Game.player.isJumping) {
-				if (Game.rand.nextInt(100) < 10) {
+				if (Game.rand.nextInt(100) < 30) {
 					Sound.hurtEffect.play();
 					Game.player.isDamaged = true;
-					//Player.life--;
+					Player.life--;
 				}
 			}  
 		}
-		if (!this.isDamaged)
-			followPath(path);
+		followPath(path);
 	}
 
 	public boolean isCollidingWithPlayer() {

@@ -69,43 +69,43 @@ public class Creature extends Entity{
 	}
 
 	public void followPath(List<Node> path) {
-    if (path != null && path.size() > 0) {
-        Vector2i target = path.get(path.size() - 1).tile;
+    	if (path != null && path.size() > 0) {
+        	Vector2i target = path.get(path.size() - 1).tile;
 
-        if (x < target.x*16) {
-            if (!isColliding((int)(x + speed), this.getY())) {
-                x += speed;
-                dir = right_dir;
-                moved = true;
-            } else path.clear();
-        } else if (x > target.x*16) {
-            if (!isColliding((int)(x - speed), this.getY())) {
-                x -= speed;
-                dir = left_dir;
-                moved = true;
-            } else path.clear();
-        } else if (y < target.y*16) {
-            if (!isColliding(this.getX(), (int)(y + speed))) {
-                y += speed;
-                dir = down_dir;
-                moved = true;
-            } else path.clear();
-        } else if (y > target.y*16) {
-            if (!isColliding(this.getX(), (int)(y - speed))) {
-                y -= speed;
-                dir = up_dir;
-                moved = true;
-            } else path.clear();
-        }
+	        if (x < target.x*16) {
+    	        if (!isColliding((int)(x + speed), this.getY())) {
+        	        x += speed;
+            	    dir = right_dir;
+                	moved = true;
+            	} else path.clear();
+	        } else if (x > target.x*16) {
+    	        if (!isColliding((int)(x - speed), this.getY())) {
+        	        x -= speed;
+            	    dir = left_dir;
+                	moved = true;
+	            } else path.clear();
+    	    } else if (y < target.y*16) {
+        	    if (!isColliding(this.getX(), (int)(y + speed))) {
+            	    y += speed;
+                	dir = down_dir;
+	                moved = true;
+    	        } else path.clear();
+        	} else if (y > target.y*16) {
+            	if (!isColliding(this.getX(), (int)(y - speed))) {
+                	y -= speed;
+            	    dir = up_dir;
+        	        moved = true;
+    	        } else path.clear();
+	        }
 
-		// Arredonda a coordenada para retirar a parte decimal
-        if (Math.abs(x - target.x*16) < speed && Math.abs(y - target.y*16) < speed) {
-            x = target.x*16; 
-            y = target.y*16;
-            path.remove(path.size() - 1);
-        }
-    }
-}
+			// Arredonda a coordenada para retirar a parte decimal
+    	    if (Math.abs(x - target.x*16) < speed && Math.abs(y - target.y*16) < speed) {
+        	    x = target.x*16; 
+            	y = target.y*16;
+            	path.remove(path.size() - 1);
+        	}
+    	}
+	}
     
     public void render(Graphics2D g2d) {
 		// Hitbox

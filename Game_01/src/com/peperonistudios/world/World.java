@@ -10,8 +10,7 @@ import javax.imageio.ImageIO;
 import com.peperonistudios.entities.Collectable;
 import com.peperonistudios.entities.Enemy;
 import com.peperonistudios.entities.Entity;
-import com.peperonistudios.entities.LifeElixir;
-import com.peperonistudios.entities.ManaElixir;
+import com.peperonistudios.entities.Elixir;
 import com.peperonistudios.entities.Player;
 import com.peperonistudios.entities.Projectile;
 import com.peperonistudios.entities.SpellBook;
@@ -79,17 +78,31 @@ public class World {
                 break;
             case 0xFF007F0E:
                 // HEALTH ELIXIR
-                LifeElixir le = new LifeElixir(xx * 16, yy * 16, 16, 16, Entity.LIFE_ELIXIR_EN,
-                                               3, 3, 10, 13);
+                Elixir le = new Elixir(xx * 16, yy * 16, 16, 16, Entity.LIFE_ELIXIR_EN,
+                                               3, 3, 10, 13, 13);
                 Game.entities.add(le);
                 Game.collectables.add(le);
                 break;
+            case 0xFF003F06:
+                // BIG HEALTH ELIXIR
+                Elixir ble = new Elixir(xx * 16, yy * 16, 16, 16, Entity.BIGGER_LIFE_ELIXIR_EN,
+                                               2, 0, 12, 16, 20);
+                Game.entities.add(ble);
+                Game.collectables.add(ble);
+                break;
             case 0xFF007F7F:
                 // MANA ELIXIR
-                ManaElixir me = new ManaElixir(xx * 16, yy * 16, 16, 16, Entity.MANA_ELIXIR_EN,
-                                               3, 3, 10, 13);
+                Elixir me = new Elixir(xx * 16, yy * 16, 16, 16, Entity.MANA_ELIXIR_EN,
+                                               3, 3, 10, 13, 13);
                 Game.entities.add(me);
                 Game.collectables.add(me);
+                break;
+            case 0xFF003A3A:
+                // BIG MANA ELIXIR
+                Elixir bme = new Elixir(xx * 16, yy * 16, 16, 16, Entity.BIGGER_MANA_ELIXIR_EN,
+                                               2, 0, 12, 16, 20);
+                Game.entities.add(bme);
+                Game.collectables.add(bme);
                 break;
             case 0xFFFF0000:
                 // FIRE MAGIC BOOK
@@ -118,6 +131,48 @@ public class World {
 			e.printStackTrace();
 		}
 	}
+
+    // Geração de mapa "automática"
+    public World() {
+        Game.player.setX(25*16);
+        Game.player.setY(25*16);
+        WIDTH = 50;
+        HEIGHT = 50;
+        tiles = new Tile[WIDTH*HEIGHT];
+        for (int xx = 0; xx < WIDTH; xx++) {
+            for (int yy = 0; yy < HEIGHT; yy++) {
+                tiles[xx + yy*WIDTH] = new WallTile(xx*16, yy*16, Tile.TILE_SOLOTREE);
+            }
+        }
+
+        int dir = 0;
+        int xx = 25, yy = 25;
+        for (int i = 0; i < 400; i++) {
+
+            // Direita
+            if (dir == 0) {
+                if (xx < WIDTH) xx++;
+
+            // Esquerda
+            } else if (dir == 1) {
+                if (xx > 0) xx--;
+
+            // Baixo
+            } else if (dir == 2) {
+                if (yy < HEIGHT) yy++;
+
+            // Cima
+            } else if (dir == 3) {
+                if (yy > 0) yy--;
+            }
+
+            if (Game.rand.nextInt(100) < 30) {
+                dir = Game.rand.nextInt(4);
+            }
+
+            tiles[xx + yy*WIDTH] = new FloorTile(xx*16, yy*16, Tile.TILE_GRASS);
+        }
+    }
 
     public static boolean isFreeCreature(int xnext, int ynext, int zplayer) {
         int pxl_a_menos = 2;
@@ -190,6 +245,7 @@ public class World {
         Player.life = Player.max_life; Player.mana = 0; 
 		Game.entities.add(Game.player);
 		Game.world = new World("/" + level);
+        //Game.world = new World();
 	}
 
     public static void loadLevel (String level) {
@@ -204,6 +260,7 @@ public class World {
 		Game.spritesheet = new Spritesheet("/spritesheet.png");
 		Game.entities.add(Game.player);
 		Game.world = new World("/" + level);
+        //Game.world = new World();
 	}
 
 	public void render(Graphics2D g2d) {
