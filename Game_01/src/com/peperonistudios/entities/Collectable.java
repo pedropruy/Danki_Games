@@ -3,6 +3,7 @@ package com.peperonistudios.entities;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
+import com.peperonistudios.main.Game;
 import com.peperonistudios.world.Camera;
 
 public class Collectable extends Entity {
@@ -11,7 +12,8 @@ public class Collectable extends Entity {
     
 	public Collectable(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw,
             int maskh) {
-        super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
+        super(x, y, width, height, sprite, 2, maskx, masky, maskw, maskh);
+		index = Game.rand.nextInt(4);
     }
 
 

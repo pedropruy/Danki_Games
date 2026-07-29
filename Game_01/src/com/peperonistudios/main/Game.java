@@ -16,6 +16,7 @@ import java.awt.image.DataBufferInt;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -34,6 +35,8 @@ import com.peperonistudios.world.Camera;
 import com.peperonistudios.world.World;
 
 public class Game extends Canvas implements Runnable, KeyListener, MouseListener {
+
+	/* jar --create --file=out/Game.jar --main-class=com.peperonistudios.main.Game -C bin . */
 
 	private static final long serialVersionUID = 1L;
 	public static JFrame frame;
@@ -61,6 +64,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public static Random rand;
 
 	public UI ui;
+	public Sound sound;
 	public InputStream k_stream = ClassLoader.getSystemClassLoader().getResourceAsStream("KiwiSoda.ttf");
 	public static Font kiwi;
 	public InputStream h_stream = ClassLoader.getSystemClassLoader().getResourceAsStream("rainyhearts.ttf");
@@ -74,10 +78,8 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	private static boolean showMessageGameOver = false;
 	private static int framesMessageGameOver = 0;
 	private static boolean restartGame = false;
-
 	
 	public Game() {
-		//Sound.musicBackground.loop();
 		rand = new Random();
 		addKeyListener(this);
 		addMouseListener(this);
@@ -96,9 +98,6 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		player = new Player(0,0,16,16,spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
 		entities.add(player);
 		
-		ui = new UI();
-		//ui.createLightmap("/lightmap.png");
-
 		try {
 			kiwi = Font.createFont(Font.TRUETYPE_FONT, k_stream).deriveFont(16f);
 			hearts = Font.createFont(Font.TRUETYPE_FONT, h_stream).deriveFont(16f);
@@ -106,6 +105,12 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		} catch (IOException e) {}
 
 		world = new World("/level1.png");
+
+		ui = new UI();
+		//ui.createLightmap("/lightmap.png");
+		ui.createMinimap();
+    
+		Sound.musicBackground.loop();
 
 		menu = new Menu();
 	}
@@ -204,7 +209,8 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			g2d.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
 		} else {		
 			world.render(g2d);
-		
+
+			Collections.sort(entities,Entity.entitySorter);
 			// Renderizando apenas o que está dentro da distância de simulação
 			for(int i = 0; i < entities.size(); i++) {
 				if (entities.get(i) instanceof Player ||
@@ -216,8 +222,6 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			for (int i = 0; i < projectiles.size(); i++) {
 				projectiles.get(i).render(g2d);
 			}
-
-			//applyLight();
 
 			ui.render(g2d);
 
@@ -240,18 +244,6 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		}
 		bs.show();
 	}
-
-	/*public void drawRectangleExemple(int xoff, int yoff) {
-		for (int xx = 0; xx < 32; xx++) {
-			for (int yy = 0; yy < 32; yy++) {
-				int xOff = xx + xoff;
-				int yOff = yy + yoff;
-				if (xOff < 0 || yOff < 0 || xOff >= WIDTH || yOff >= HEIGHT)
-					continue;
-				pixels[xOff + (yOff*WIDTH)] = 0xff0000;
-			}
-		}
-	}*/
 	
 	public void run() {
 		long lastTime = System.nanoTime();

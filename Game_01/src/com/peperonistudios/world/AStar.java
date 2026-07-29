@@ -8,33 +8,39 @@ import java.util.List;
 public class AStar {
 
     public static double LastTime = System.currentTimeMillis();
+
     private static Comparator<Node> nodeSorter = new Comparator<Node>() {
         @Override
-        public int compare (Node n0, Node n1) {
+        public int compare(Node n0, Node n1) {
             if (n1.fCost < n0.fCost) return +1;
             if (n1.fCost > n0.fCost) return -1;
-            else return 0;
+            return 0;
         }
-
     };
 
     public static boolean clear() {
-        if (System.currentTimeMillis() - LastTime >= 1000) return true;
-        else  return false;
+        return (System.currentTimeMillis() - LastTime >= 1000);
     }
 
-	private static double calculateDistance (Vector2i tile, Vector2i goal) {
-		double dx = tile.x - goal.x;
+    private static double calculateDistance(Vector2i tile, Vector2i goal) {
+        double dx = tile.x - goal.x;
         double dy = tile.y - goal.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
 
-        return Math.sqrt(dx*dx + dy*dy);
-	}
-
-    private static boolean vecInList (List<Node> list, Vector2i vector) {
+    private static Node getNodeInList(List<Node> list, Vector2i vector) {
         for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).tile.equals(vector)) return true;
+            if (list.get(i).tile.equals(vector)) return list.get(i);
         }
-        return false;
+        return null;
+    }
+
+    private static boolean isWall(int x, int y) {
+        // Checa limites do mapa para não estourar exceção nem ler memória errada
+        if (x < 0 || y < 0 || x >= World.WIDTH || y >= World.HEIGHT) return true;
+        
+        Tile tile = World.tiles[x + (y * World.WIDTH)];
+        return (tile == null || tile instanceof WallTile);
     }
 
     public static List<Node> findPath(World world, Vector2i start, Vector2i end) {
@@ -45,12 +51,11 @@ public class AStar {
         Node current = new Node(start, null, 0, calculateDistance(start, end));
         openList.add(current);
 
-        while (openList.size() > 0) {
+        while (!openList.isEmpty()) {
             Collections.sort(openList, nodeSorter);
             current = openList.get(0);
 
             if (current.tile.equals(end)) {
-                // Chegamos no ponto final!
                 List<Node> path = new ArrayList<Node>();
                 while (current.parent != null) {
                     path.add(current);
@@ -65,55 +70,48 @@ public class AStar {
             closedList.add(current);
 
             for (int i = 0; i < 9; i++) {
-                if (i == 4) continue;
-                
+                if (i == 4) continue; // Pula o próprio nó central
+
                 int x = current.tile.x;
                 int y = current.tile.y;
-                int xi = (i%3) - 1;
-                int yi = (i/3) - 1;
-                Tile tile = World.tiles[x+xi + ((y+yi) * World.WIDTH)];
+                int xi = (i % 3) - 1;
+                int yi = (i / 3) - 1;
 
-                if (tile == null) continue;
-                if (tile instanceof WallTile) continue;
+                int targetX = x + xi;
+                int targetY = y + yi;
 
-                if (i == 0) {
-                    Tile test1 = World.tiles[x+xi+1 + ((y+yi) * World.WIDTH)];
-                    Tile test2 = World.tiles[x+xi + ((y+yi+1) * World.WIDTH)];
-                    if (test1 instanceof WallTile || test2 instanceof WallTile)
+                // 1. Se o próprio tile alvo for parece, ignora
+                if (isWall(targetX, targetY)) continue;
+
+                // 2. Bloqueio de corte de quina na diagonal
+                if (xi != 0 && yi != 0) {
+                    // Se qualquer uma das paredes adjacentes for WallTile, impede o movimento diagonal
+                    if (isWall(x + xi, y) || isWall(x, y + yi)) {
                         continue;
-                } else if (i == 2) {
-                    Tile test1 = World.tiles[x+xi-1 + ((y+yi) * World.WIDTH)];
-                    Tile test2 = World.tiles[x+xi + ((y+yi+1) * World.WIDTH)];
-                    if (test1 instanceof WallTile || test2 instanceof WallTile)
-                        continue;
-                } else if (i == 6) {
-                    Tile test1 = World.tiles[x+xi + ((y+yi-1) * World.WIDTH)];
-                    Tile test2 = World.tiles[x+xi+1 + ((y+yi) * World.WIDTH)];
-                    if (test1 instanceof WallTile || test2 instanceof WallTile)
-                        continue;
-                } else if (i == 8) {
-                    Tile test1 = World.tiles[x+xi + ((y+yi-1) * World.WIDTH)];
-                    Tile test2 = World.tiles[x+xi-1 + ((y+yi) * World.WIDTH)];
-                    if (test1 instanceof WallTile || test2 instanceof WallTile)
-                        continue;
+                    }
                 }
 
-                Vector2i a = new Vector2i(x+xi, y+yi);
+                Vector2i a = new Vector2i(targetX, targetY);
                 double gCost = current.gCost + calculateDistance(current.tile, a);
                 double hCost = calculateDistance(a, end);
 
-                Node node = new Node(a, current, gCost, hCost);
-                if (vecInList(closedList, a) && gCost >= current.gCost) continue;
-                
-                if (!vecInList(openList, a)) openList.add(node);
-                else if (gCost < current.gCost) {
-                    openList.remove(current);
+                Node existingClosed = getNodeInList(closedList, a);
+                if (existingClosed != null && gCost >= existingClosed.gCost) continue;
+
+                Node existingOpen = getNodeInList(openList, a);
+                if (existingOpen == null) {
+                    Node node = new Node(a, current, gCost, hCost);
                     openList.add(node);
+                } else if (gCost < existingOpen.gCost) {
+                    // Atualiza o nó existente com o novo caminho mais curto
+                    existingOpen.parent = current;
+                    existingOpen.gCost = gCost;
+                    existingOpen.fCost = gCost + hCost;
                 }
             }
         }
+        
         closedList.clear();
-        return null;        
+        return null;
     }
-    
 }

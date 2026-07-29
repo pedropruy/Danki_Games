@@ -24,7 +24,7 @@ public class Projectile extends Entity{
     public Projectile(int x, int y, int width, int height, String magicName,
                       int maskx, int masky, int maskw, int maskh,
                       double dx, double dy, int max_duration, double angle, int damage) {
-		super(x, y, width, height, null, maskx, masky, maskw, maskh);
+		super(x, y, width, height, null, 3, maskx, masky, maskw, maskh);
 
         this.damage = damage;
 

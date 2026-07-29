@@ -16,6 +16,7 @@ import com.peperonistudios.entities.Player;
 import com.peperonistudios.entities.Projectile;
 import com.peperonistudios.entities.SpellBook;
 import com.peperonistudios.graficos.Spritesheet;
+import com.peperonistudios.graficos.UI;
 import com.peperonistudios.main.Game;
 
 public class World {
@@ -228,4 +229,36 @@ public class World {
 			}
 		}
 	}
+
+    public static void renderMinimap () {
+        for (int i = 0; i < UI.minimapPixels.length; i++) {
+            UI.minimapPixels[i] = 0;
+        }
+
+        for (int xx = 0; xx < WIDTH; xx++) {
+            for (int yy = 0; yy < HEIGHT; yy++) {
+                if (tiles[xx + (yy*WIDTH)] instanceof WallTile) {
+                    UI.minimapPixels[xx + (yy*WIDTH)] = 0x00ff00;
+                }
+
+                if (tiles[xx + (yy*WIDTH)] instanceof ObstacleTile) {
+                    UI.minimapPixels[xx + (yy*WIDTH)] = 0x0000ff;
+                }
+            }
+        }
+
+        int xPlayer = Game.player.getX() / 16;
+        int yPlayer = Game.player.getY() / 16;
+        UI.minimapPixels[xPlayer + (yPlayer*WIDTH)] = 0xffffff;
+
+        int xEnemy = 0;
+        int yEnemy = 0;
+        for (int i = 0; i < Game.enemies.size(); i++) {
+            xEnemy = Game.enemies.get(i).getX() / 16;
+            yEnemy = Game.enemies.get(i).getY() / 16;
+            UI.minimapPixels[xEnemy + (yEnemy*WIDTH)] = 0xff0000;
+        }
+        
+    }
+
 }

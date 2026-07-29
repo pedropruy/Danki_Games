@@ -33,7 +33,7 @@ public class Player extends Creature {
 	MagicFocus mf;
 	
 	public Player(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
-		super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
+		super(x, y, width, height, sprite, 1, maskx, masky, maskw, maskh);
 
 		knowSpell.add("basic");
 
@@ -59,9 +59,10 @@ public class Player extends Creature {
 		if (jumped) {
 			jumped = false;
 			if (isJumping == false) {
-				//Sound.jumpEffect.play();
+				Sound.jumpEffect.play();
 				isJumping = true;
 				jumpUp = true;
+				depth = 10;
 			}
 		}
 
@@ -74,6 +75,7 @@ public class Player extends Creature {
 						jumpDown = false;
 						jumpUp = false;
 						z = 0;
+						depth = 1;
 					}
 				}
 				z = currentJumpFrames;
@@ -221,7 +223,7 @@ public class Player extends Creature {
 					break;
 				    
 					case "fire":
-						if (mana > 0 && gotFireBook) {
+						if (mana >= 2 && gotFireBook) {
 						spell = new Projectile(px, py, 8, 8, "fire", 3, 3,
 											   10, 11, dx, dy, 30, angle, 5);					
 						mana-= 2;
@@ -230,7 +232,7 @@ public class Player extends Creature {
 					break;
 					
 					case "ice":
-						if (mana > 0 && gotIceBook) {
+						if (mana >= 4 && gotIceBook) {
 						spell = new Projectile(px, py, 8, 8, "ice", 4, 2,
 											   8, 12, dx, dy, 40, angle, 10);					
 						mana-= 4;

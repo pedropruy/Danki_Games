@@ -3,6 +3,7 @@ package com.peperonistudios.entities;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.Comparator;
 
 import com.peperonistudios.main.Game;
 
@@ -35,16 +36,18 @@ public class Entity {
 	protected int height;
 	
 	protected BufferedImage sprite;
+	protected int depth;
 
 	protected int maskx, masky, maskw, maskh;
 	
-	public Entity(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
+	public Entity(int x, int y, int width, int height, BufferedImage sprite, int depth, int maskx, int masky, int maskw, int maskh) {
 		this.x = x;
 		this.y = y;
 		this.z = 0;
 		this.width = width;
 		this.height = height;
 		this.sprite = sprite;
+		this.depth = depth;
 
 		this.maskx = maskx;
 		this.masky = masky;
@@ -102,6 +105,16 @@ public class Entity {
 
 		return e1Mask.intersects(e2Mask);
 	}
+
+	public static Comparator<Entity> entitySorter = new Comparator<Entity>() {
+        @Override
+		// Quem tem o depth maior será o último renderizado
+        public int compare (Entity e0, Entity e1) {
+            if (e1.depth < e0.depth) return +1;
+            if (e1.depth > e0.depth) return -1;
+            else return 0;
+        }
+    };
 
 	public void render(Graphics2D g2d) {
     }

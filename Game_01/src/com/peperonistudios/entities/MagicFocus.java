@@ -14,7 +14,7 @@ public class MagicFocus extends Entity {
 
     public MagicFocus(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw,
             int maskh, Player player) {
-        super(x, y, width, height, Entity.MAGIC_FOCUS_EN, maskx, masky, maskw, maskh);
+        super(x, y, width, height, Entity.MAGIC_FOCUS_EN, 1, maskx, masky, maskw, maskh);
         this.playerOnwer = player;
     }
 

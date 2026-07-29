@@ -1,5 +1,6 @@
 package com.peperonistudios.entities;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -34,9 +35,9 @@ public class Creature extends Entity{
 	protected int damageMode = 0;
 
 
-    public Creature(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw,
+    public Creature(int x, int y, int width, int height, BufferedImage sprite, int depth, int maskx, int masky, int maskw,
             int maskh) {
-        super(x, y, width, height, sprite, maskx, masky, maskw, maskh);
+        super(x, y, width, height, sprite, depth, maskx, masky, maskw, maskh);
     }
 
 	public boolean isColliding (int xnext, int ynext) {
@@ -68,35 +69,50 @@ public class Creature extends Entity{
 	}
 
 	public void followPath(List<Node> path) {
-		if (path != null) {
-			if (path.size() > 0) {
-				Vector2i target = path.get(path.size() - 1).tile;
-				// O A* analiza por tile e não por pixel
-				if (x < target.x*16 && !isColliding((int)(x+speed), this.getY())) {
-					x += speed;
-					dir = right_dir;
-					moved = true;
-				} else if (x > target.x*16 && !isColliding((int)(x-speed), this.getY())) { 
-					x -= speed;
-					dir = left_dir;
-					moved = true;
-				} else if (y < target.y*16 && !isColliding(this.getX(), (int)(y-speed))) {
-					y += speed;
-					dir = down_dir;
-					moved = true;
-				} else if (y > target.y*16 && !isColliding(this.getX(), (int)(y-speed))) {
-					y -= speed;
-					dir = up_dir;
-					moved = true;
-				}
+    if (path != null && path.size() > 0) {
+        Vector2i target = path.get(path.size() - 1).tile;
 
-				if (x == target.x*16 && y == target.y*16)
-					path.remove(path.size() - 1);
-			}
-		}
-	}
+        if (x < target.x*16) {
+            if (!isColliding((int)(x + speed), this.getY())) {
+                x += speed;
+                dir = right_dir;
+                moved = true;
+            } else path.clear();
+        } else if (x > target.x*16) {
+            if (!isColliding((int)(x - speed), this.getY())) {
+                x -= speed;
+                dir = left_dir;
+                moved = true;
+            } else path.clear();
+        } else if (y < target.y*16) {
+            if (!isColliding(this.getX(), (int)(y + speed))) {
+                y += speed;
+                dir = down_dir;
+                moved = true;
+            } else path.clear();
+        } else if (y > target.y*16) {
+            if (!isColliding(this.getX(), (int)(y - speed))) {
+                y -= speed;
+                dir = up_dir;
+                moved = true;
+            } else path.clear();
+        }
+
+		// Arredonda a coordenada para retirar a parte decimal
+        if (Math.abs(x - target.x*16) < speed && Math.abs(y - target.y*16) < speed) {
+            x = target.x*16; 
+            y = target.y*16;
+            path.remove(path.size() - 1);
+        }
+    }
+}
     
     public void render(Graphics2D g2d) {
+		// Hitbox
+        /*g2d.setColor(Color.BLUE);
+        g2d.fillRect(this.getX() + maskx - Camera.x, this.getY() + masky - Camera.y,
+                     maskw, maskh);*/
+
         g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + offsetShadow, null);
 
 

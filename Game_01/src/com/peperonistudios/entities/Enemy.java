@@ -15,12 +15,9 @@ public class Enemy extends Creature {
 	public int max_life = 3, life = max_life;
 
 	public Enemy(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
-		super(x, y, width, height, null, maskx, masky, maskw, maskh);
+		super(x, y, width, height, null, 0, maskx, masky, maskw, maskh);
 		
 		this.speed = 0.5;
-
-		// Tem que trocar isto caso for fazer outro inimigo
-		this.setMask(2, 3, 13, 11);
 
 		sideCreature = new BufferedImage[2];
 		upCreature = new BufferedImage[2];
@@ -126,7 +123,7 @@ public class Enemy extends Creature {
 			// Estamos colidindo com o player
 			if(!Game.player.isDamaged && !Game.player.isJumping) {
 				if (Game.rand.nextInt(100) < 10) {
-					//Sound.hurtEffect.play();
+					Sound.hurtEffect.play();
 					Game.player.isDamaged = true;
 					Player.life--;
 				}
@@ -137,16 +134,17 @@ public class Enemy extends Creature {
 	private void enemyMovement_advenced() {
 		if (!isCollidingWithPlayer()) {
 			if (path == null || path.size() == 0 || Game.player.moved) {
-				Vector2i start = new Vector2i(this.getX()/16, this.getY()/16);
+				Vector2i start = new Vector2i((this.getX()+8)/16, (this.getY()+8)/16);
 				Vector2i end = new Vector2i((Game.player.getX()+8)/16, (Game.player.getY()+8)/16);
 				path = AStar.findPath(Game.world, start, end);
 			}
 		} else {
+			// Colidindo com o Jogador
 			if(!Game.player.isDamaged && !Game.player.isJumping) {
 				if (Game.rand.nextInt(100) < 10) {
-					//Sound.hurtEffect.play();
+					Sound.hurtEffect.play();
 					Game.player.isDamaged = true;
-					Player.life--;
+					//Player.life--;
 				}
 			}  
 		}
@@ -166,8 +164,8 @@ public class Enemy extends Creature {
 			Projectile e = Game.projectiles.get(i);
 			
 			if (Entity.isColliding(this, e)) {
-				//Sound.hurtEffect.play();
 				if (!isDamaged) {
+					Sound.hurtEffect.play();
 					life -= e.damage;
 					this.isDamaged = true;
 				} 
