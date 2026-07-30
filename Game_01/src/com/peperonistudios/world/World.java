@@ -294,26 +294,29 @@ public class World {
 
         for (int xx = 0; xx < WIDTH; xx++) {
             for (int yy = 0; yy < HEIGHT; yy++) {
+                /*if (tiles[xx + (yy*WIDTH)] instanceof FloorTile) {
+                    UI.minimapPixels[xx + (yy*WIDTH)] = 0xc0000000;
+                }*/
                 if (tiles[xx + (yy*WIDTH)] instanceof WallTile) {
-                    UI.minimapPixels[xx + (yy*WIDTH)] = 0x00ff00;
+                    UI.minimapPixels[xx + (yy*WIDTH)] = 0xff00ff00;
                 }
 
                 if (tiles[xx + (yy*WIDTH)] instanceof ObstacleTile) {
-                    UI.minimapPixels[xx + (yy*WIDTH)] = 0x0000ff;
+                    UI.minimapPixels[xx + (yy*WIDTH)] = 0xff0000ff;
                 }
             }
         }
 
         int xPlayer = Game.player.getX() / 16;
         int yPlayer = Game.player.getY() / 16;
-        UI.minimapPixels[xPlayer + (yPlayer*WIDTH)] = 0xffffff;
+        UI.minimapPixels[xPlayer + (yPlayer*WIDTH)] = 0xffffffff;
 
         int xEnemy = 0;
         int yEnemy = 0;
         for (int i = 0; i < Game.enemies.size(); i++) {
             xEnemy = Game.enemies.get(i).getX() / 16;
             yEnemy = Game.enemies.get(i).getY() / 16;
-            UI.minimapPixels[xEnemy + (yEnemy*WIDTH)] = 0xff0000;
+            UI.minimapPixels[xEnemy + (yEnemy*WIDTH)] = 0xffff0000;
         }
         
     }
