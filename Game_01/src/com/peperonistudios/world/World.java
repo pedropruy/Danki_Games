@@ -8,8 +8,10 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 import com.peperonistudios.entities.Collectable;
+import com.peperonistudios.entities.Creature;
 import com.peperonistudios.entities.Enemy;
 import com.peperonistudios.entities.Entity;
+import com.peperonistudios.entities.Npc;
 import com.peperonistudios.entities.Elixir;
 import com.peperonistudios.entities.Player;
 import com.peperonistudios.entities.Projectile;
@@ -71,10 +73,18 @@ public class World {
                 break;
             case 0xFFB200FF:
                 // PURPLE SLIME
-                Enemy en = new Enemy(xx * 16, yy * 16, 16, 16, Entity.PURP_SLIME_EN,
-                                     2 , 3, 13, 11);
+                Enemy en = new Enemy(xx * 16, yy * 16, 16, 16, 0,
+                                     32, 0.5, 2 , 3,
+                                     13, 11);
                 Game.entities.add(en);
                 Game.enemies.add(en);
+                break;
+            case 0xFF7F0000:
+                // HUNTER
+                Npc h  = new Npc(xx * 16, yy * 16, 16, 16, 0, 80,
+                                     0, 0, 16, 16);
+                Game.entities.add(h);
+                Game.npcs.add(h);
                 break;
             case 0xFF007F0E:
                 // HEALTH ELIXIR
@@ -233,15 +243,16 @@ public class World {
     public static void restartGame (String level) {
 		Game.entities.clear();
 		Game.enemies.clear();
+		Game.npcs.clear();
 		Game.collectables.clear();
 		Game.projectiles.clear();
 		Game.entities = new ArrayList<Entity>();
 		Game.enemies = new ArrayList<Enemy>();
-		Game.collectables = new ArrayList<Collectable>();
+		Game.npcs = new ArrayList<Npc>();
+        Game.collectables = new ArrayList<Collectable>();
 		Game.projectiles = new ArrayList<Projectile>();
 		Game.spritesheet = new Spritesheet("/spritesheet.png");
-		Game.player = new Player(0,0,16,16,Game.spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
-		// Possivelmente um resetPlayer aqui!
+		Game.player = new Player(0,0,16,16,0,0, 0, 0, 16, 16);
         Player.life = Player.max_life; Player.mana = 0; 
 		Game.entities.add(Game.player);
 		Game.world = new World("/" + level);
@@ -251,10 +262,12 @@ public class World {
     public static void loadLevel (String level) {
 		Game.entities.clear();
 		Game.enemies.clear();
+		Game.npcs.clear();
 		Game.collectables.clear();
 		Game.projectiles.clear();
 		Game.entities = new ArrayList<Entity>();
 		Game.enemies = new ArrayList<Enemy>();
+		Game.npcs = new ArrayList<Npc>();
 		Game.collectables = new ArrayList<Collectable>();
 		Game.projectiles = new ArrayList<Projectile>();
 		Game.spritesheet = new Spritesheet("/spritesheet.png");

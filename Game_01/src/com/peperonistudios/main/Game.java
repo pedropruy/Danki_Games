@@ -28,6 +28,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import com.peperonistudios.entities.Entity;
+import com.peperonistudios.entities.Npc;
 import com.peperonistudios.entities.Collectable;
 import com.peperonistudios.entities.Creature;
 import com.peperonistudios.entities.Enemy;
@@ -49,6 +50,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public static final int WIDTH = 240;
 	public static final int HEIGHT = 240;
 	public static final int SCALE = 3;
+	// ERROR: a simulação deve estar de acordo com a camera e não a distância do player
 	public static final int SIMULATION_DISTANCE = 10*16;
 	public static int CURRENT_LEVEL = 1, MAX_LEVEL = 2;
 	
@@ -56,6 +58,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	
 	public static List<Entity> entities;
 	public static List<Enemy> enemies;
+	public static List<Npc> npcs;
 	public static List<Collectable> collectables;
 	public static List<Projectile> projectiles;
 	public static Spritesheet spritesheet;
@@ -77,6 +80,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public static int[] screenPixels;
 
 	public Menu menu;
+	public Cutscene cutscene;
 
 	public static String gameState = "Menu";
 	private static boolean showMessageGameOver = false;
@@ -95,13 +99,14 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 				
 		entities = new ArrayList<Entity>();
 		enemies = new ArrayList<Enemy>();
+		npcs = new ArrayList<Npc>();
 		collectables = new ArrayList<Collectable>();
 		projectiles = new ArrayList<Projectile>();
 
 		spritesheet = new Spritesheet("/spritesheet.png");
-		player = new Player(0,0,16,16,spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
+		player = new Player(0,0,16,16,0,0, 0, 0, 16, 16);
 		entities.add(player);
-		
+
 		try {
 			kiwi = Font.createFont(Font.TRUETYPE_FONT, k_stream).deriveFont(16f);
 			hearts = Font.createFont(Font.TRUETYPE_FONT, h_stream).deriveFont(16f);
@@ -115,9 +120,10 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		//ui.createLightmap("/lightmap.png");
 		ui.createMinimap();
     
-		Sound.musicBackground.loop();
+		Sounds.musicBackground.loop();
 
 		menu = new Menu();
+		cutscene = new Cutscene();
 	}
 	
 	public void initFrame() {
@@ -143,7 +149,6 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
-		requestFocus();
 	}
 	
     public synchronized void start() {
@@ -170,15 +175,19 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public void tick() {
 		if (gameState == "Menu") {
 			menu.tick();
+		} else if (gameState == "Cutscene") {
+			cutscene.tick();
 		} else if (gameState == "Normal") {
+			ui.tick();
 			restartGame = false;
 
 			// Rodando o tick apenas das entidades dentro da distância de simulação
 			for (int i = 0; i < entities.size(); i++) {
 				if (entities.get(i) instanceof Player ||
 					Creature.calculateDistance(Camera.x + WIDTH/2, Camera.y + HEIGHT/2,
-					entities.get(i)) < SIMULATION_DISTANCE)
-					entities.get(i).tick();
+					entities.get(i)) < SIMULATION_DISTANCE) {
+						entities.get(i).tick();
+					}
 			}
 
 			for (int i = 0; i < projectiles.size(); i++) {
@@ -259,13 +268,14 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 				g2d.drawString("GAME OVER!", 85*SCALE, 115*SCALE);
 				g2d.setFont(new Font("arial", Font.BOLD, 20));
 				if (showMessageGameOver)
-					g2d.drawString("> Pressione espaço para reiniciar <", 48*SCALE, 127*SCALE);
+					g2d.drawString("> Pressione enter para reiniciar <", 48*SCALE, 127*SCALE);
 			}
 		}
 		bs.show();
 	}
 	
 	public void run() {
+		requestFocus();
 		long lastTime = System.nanoTime();
 		double amountOfTicks = 60.0;
 		double ns = 1000000000/amountOfTicks;
@@ -327,8 +337,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		}
 		
 		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-			if (gameState == "GameOver") restartGame = true;
-			else player.jumped = true;
+			player.jumped = true;
 		}
 
 		if (playerAction) {
@@ -343,10 +352,9 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			}
 		}
 
-		if (gameState == "Menu") {
-			if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-				menu.optionSelected = true;
-			}
+		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			if (gameState == "Menu") menu.optionSelected = true;
+			else if (gameState == "GameOver") restartGame = true;
 		}
 	}
 
@@ -376,6 +384,13 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 		if (e.getKeyCode() == KeyEvent.VK_V) {
 			playerAction = true;
 			player.nextSpell = false;
+		}
+
+		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+			if (gameState == "Normal") {
+				if (UI.showMessage) UI.showMessage = false;
+				else player.checkInteraction = true;
+			}
 		}
 	}
 

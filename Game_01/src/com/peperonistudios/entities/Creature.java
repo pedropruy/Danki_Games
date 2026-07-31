@@ -34,10 +34,21 @@ public class Creature extends Entity{
 	// 0 = Normal, 1 = Branco, 2 = Transparente
 	protected int damageMode = 0;
 
+	public boolean isInteracting = false;
 
-    public Creature(int x, int y, int width, int height, BufferedImage sprite, int depth, int maskx, int masky, int maskw,
-            int maskh) {
-        super(x, y, width, height, sprite, depth, maskx, masky, maskw, maskh);
+
+    public Creature(int x, int y, int width, int height, int xsprite, int ysprite, int maskx, int masky, int maskw, int maskh) {
+		super(x, y, width, height, null, 0, maskx, masky, maskw, maskh);
+
+		sideCreature = new BufferedImage[2];
+		upCreature = new BufferedImage[2];
+		downCreature = new BufferedImage[2];
+
+		for(int i = 0; i < 2; i++) {
+			sideCreature[i] = Game.spritesheet.getSprite(xsprite+64+(i*16), ysprite, 16, 16);
+			upCreature[i] = Game.spritesheet.getSprite(xsprite+32+(i*16), ysprite, 16, 16);
+			downCreature[i] = Game.spritesheet.getSprite(xsprite+(i*16), ysprite, 16, 16);
+		}
     }
 
 	public boolean isColliding (int xnext, int ynext) {
@@ -109,9 +120,9 @@ public class Creature extends Entity{
     
     public void render(Graphics2D g2d) {
 		// Hitbox
-        /*g2d.setColor(Color.BLUE);
+        g2d.setColor(Color.BLUE);
         g2d.fillRect(this.getX() + maskx - Camera.x, this.getY() + masky - Camera.y,
-                     maskw, maskh);*/
+                     maskw, maskh);
 
         g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + offsetShadow, null);
 

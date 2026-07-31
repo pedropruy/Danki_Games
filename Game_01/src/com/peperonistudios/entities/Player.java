@@ -1,18 +1,21 @@
 package com.peperonistudios.entities;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import com.peperonistudios.graficos.Spritesheet;
 import com.peperonistudios.main.Game;
-import com.peperonistudios.main.Sound;
+import com.peperonistudios.main.Sounds;
 import com.peperonistudios.world.Camera;
 import com.peperonistudios.world.World;
 
 public class Player extends Creature {
 	
 	public boolean right, up, down, left;
+
+	public boolean checkInteraction = false;
 
 	public int useSpell = 0;
 	public boolean isCasting = false, nextSpell = false;
@@ -32,22 +35,12 @@ public class Player extends Creature {
 
 	MagicFocus mf;
 	
-	public Player(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
-		super(x, y, width, height, sprite, 1, maskx, masky, maskw, maskh);
+	public Player(int x, int y, int width, int height, int xsprite, int ysprite, int maskx, int masky, int maskw, int maskh) {
+		super(x, y, width, height, xsprite, ysprite, maskx, masky, maskw, maskh);
 
 		knowSpell.add("basic");
 
 		this.offsetShadow = 2;
-		
-		sideCreature = new BufferedImage[2];
-		upCreature = new BufferedImage[2];
-		downCreature = new BufferedImage[2];
-		
-		for(int i = 0; i < 2; i++) {
-			sideCreature[i] = Game.spritesheet.getSprite(64+(i*16), 0, 16, 16);
-			upCreature[i] = Game.spritesheet.getSprite(32+(i*16), 0, 16, 16);
-			downCreature[i] = Game.spritesheet.getSprite(0+(i*16), 0, 16, 16);
-		}
 		
         this.mf = new MagicFocus(this.getX(), this.getY(), 8, 8, null, 1, 1, 6, 6, this);
         //Game.entities.add(mf);
@@ -56,10 +49,15 @@ public class Player extends Creature {
 	public void tick() {
 		this.mf.tick();
 
+		if (checkInteraction) {
+			checkInteraction = false;
+			checkInteraction();
+		}
+		
 		if (jumped) {
 			jumped = false;
-			if (isJumping == false) {
-				Sound.jumpEffect.play();
+			if (!isInteracting && isJumping == false) {
+				Sounds.jumpEffect.play();
 				isJumping = true;
 				jumpUp = true;
 				depth = 10;
@@ -86,27 +84,29 @@ public class Player extends Creature {
 				}
 		}
 
-		moved = false;
-		if(right && World.isFreeCreature((int)(x + speed),this.getY(), this.getZ())) {
-			moved = true;
-			dir = right_dir;
-			x+=speed;
-		}
-		else if (left && World.isFreeCreature((int)(x - speed),this.getY(), this.getZ())) {
-			moved = true;
-			dir = left_dir;
-			x-=speed;
-		}
-		
-		else if(up && World.isFreeCreature(this.getX(),(int)(y - speed), this.getZ())) {
-			moved = true;
-			dir = up_dir;
-			y-=speed;
-		}
-		else if (down && World.isFreeCreature(this.getX(),(int)(y + speed), this.getZ())) {
-			moved = true;
-			dir = down_dir;
-			y+=speed;
+		if (!isInteracting) {
+			moved = false;
+			if(right && World.isFreeCreature((int)(x + speed),this.getY(), this.getZ())) {
+				moved = true;
+				dir = right_dir;
+				x+=speed;
+			}
+			else if (left && World.isFreeCreature((int)(x - speed),this.getY(), this.getZ())) {
+				moved = true;
+				dir = left_dir;
+				x-=speed;
+			}
+			
+			else if(up && World.isFreeCreature(this.getX(),(int)(y - speed), this.getZ())) {
+				moved = true;
+				dir = up_dir;
+				y-=speed;
+			}
+			else if (down && World.isFreeCreature(this.getX(),(int)(y + speed), this.getZ())) {
+				moved = true;
+				dir = down_dir;
+				y+=speed;
+			}
 		}
 		
 		if(moved) {
@@ -142,9 +142,9 @@ public class Player extends Creature {
 		}
 
 		// Trocar de Magia
-		if (this.nextSpell) changeSpell();
+		if (!isInteracting && this.nextSpell) changeSpell();
 
-		if (!this.isJumping && !this.isDamaged) castSpell();
+		if (!isInteracting && !this.isJumping && !this.isDamaged) castSpell();
 
 		// Game over simples!
 		if (life <= 0) {
@@ -296,18 +296,31 @@ public class Player extends Creature {
 		}
 	}
 	
+	public void checkInteraction() {
+		for (int i = 0; i < Game.npcs.size(); i++) {
+			Npc npcAtual = Game.npcs.get(i);
+			if ((calculateDistance(this, npcAtual) < 20)) {
+				npcAtual.wasInteracted = true;
+				isInteracting = true;
+				break;
+			}
+		}
+		checkInteraction = false;
+	}
+
 	protected void destroySelf () {
 		Game.entities.clear();
 		Game.enemies.clear();
+		Game.npcs.clear();
 		Game.collectables.clear();
 		Game.projectiles.clear();
 		Game.entities = new ArrayList<Entity>();
 		Game.enemies = new ArrayList<Enemy>();
+		Game.npcs = new ArrayList<Npc>();
 		Game.collectables = new ArrayList<Collectable>();
 		Game.projectiles = new ArrayList<Projectile>();
 		Game.spritesheet = new Spritesheet("/spritesheet.png");
-		Game.player = new Player(0,0,16,16,Game.spritesheet.getSprite(0, 0, 16, 16), 0, 0, 16, 16);
-		// Possivelmente um resetPlayer aqui!
+		Game.player = new Player(0,0,16,16,0,0, 0, 0, 16, 16);
 		Player.life = max_life; Player.mana = 0;
 		Game.entities.add(Game.player);
 		Game.world = new World("/level1.png");

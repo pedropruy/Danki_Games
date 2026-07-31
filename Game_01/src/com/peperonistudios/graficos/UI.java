@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
+import com.peperonistudios.entities.Npc;
 import com.peperonistudios.entities.Player;
 import com.peperonistudios.main.Game;
 import com.peperonistudios.world.World;
@@ -23,6 +24,13 @@ public class UI {
     public static boolean showMinimap = false;
     public static int[] minimapPixels;
 
+    public static boolean showMessage = false;
+    private final int offsetMessage = 3, msgHeight = 40;
+    private final int xMsgBox = offsetMessage, yMsgBox = Game.HEIGHT - offsetMessage - msgHeight;
+    private final int xMsg = xMsgBox + 7, yMsg = yMsgBox + 16;
+    public static String message = "";
+    public static int curIndex = 0, time = 0, maxTime = 1;
+
     private Lightmap lightmap = null;
 
     public void createLightmap(String path) {
@@ -35,7 +43,30 @@ public class UI {
         showMinimap = true;
     }
 
+    public void renderMessage(Graphics2D g2d,String text) {
+        // Tem que levar em conta o tamanho do texto
+        g2d.setColor(new Color(0, 0, 0, 200));
+        g2d.fillRoundRect(xMsgBox, yMsgBox,
+                          Game.WIDTH - (offsetMessage*2), msgHeight, 15, 10);
+
+        g2d.setFont(new Font("Arial", Font.PLAIN, 10));
+        g2d.setColor(Color.WHITE);
+        g2d.drawString(text.substring(0, curIndex), xMsg, yMsg);
+    }
+
+    public void tick() {
+        if (showMessage && curIndex < message.length()) {
+            time++;
+            if (time >= maxTime) {
+                time = 0;
+                curIndex++;
+            } 
+        } 
+    }
+
     public void render(Graphics2D g2d) {
+        if (showMessage) renderMessage(g2d, message);
+
         if (lightmap != null) lightmap.applyLight();
         
         // Renderizando o preto abaixo dos icones
@@ -80,7 +111,7 @@ public class UI {
         // Renderizando Minimapa
         if (showMinimap) {
             g2d.setColor(new Color(0, 0, 0, 175));
-            g2d.fillRect(Game.HEIGHT - 40, 0, 40, 40);
+            g2d.fillRect(Game.WIDTH - 40, 0, 40, 40);
 
             World.renderMinimap();
             g2d.drawImage(minimap, Game.WIDTH - minimap.getWidth() - 5, 5, null);

@@ -15,8 +15,6 @@ public class Entity {
 	public static BufferedImage BIGGER_LIFE_ELIXIR_EN = Game.spritesheet.getSprite(128, 16, 16, 16);
 	public static BufferedImage MANA_ELIXIR_EN = Game.spritesheet.getSprite(144, 0, 16, 16);
 	public static BufferedImage BIGGER_MANA_ELIXIR_EN = Game.spritesheet.getSprite(128, 0, 16, 16);
-
-	public static BufferedImage PURP_SLIME_EN = Game.spritesheet.getSprite(0,32, 16, 16);
 	
 	public static BufferedImage MAGIC_FOCUS_EN = Game.spritesheet.getSprite(128,48, 8, 8);
 	public static BufferedImage[] BASIC_ATTACK_EN = { Game.spritesheet.getSprite(0,48, 16, 16),

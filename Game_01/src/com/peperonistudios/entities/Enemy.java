@@ -5,7 +5,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.peperonistudios.main.Game;
-import com.peperonistudios.main.Sound;
+import com.peperonistudios.main.Sounds;
 import com.peperonistudios.world.AStar;
 import com.peperonistudios.world.Vector2i;
 import com.peperonistudios.world.World;
@@ -14,19 +14,19 @@ public class Enemy extends Creature {
 
 	public int max_life = 3, life = max_life;
 
-	public Enemy(int x, int y, int width, int height, BufferedImage sprite, int maskx, int masky, int maskw, int maskh) {
-		super(x, y, width, height, null, 0, maskx, masky, maskw, maskh);
+	public Enemy(int x, int y, int width, int height, int xsprite, int ysprite, double speed, int maskx, int masky, int maskw, int maskh) {
+		super(x, y, width, height, xsprite, ysprite, maskx, masky, maskw, maskh);
 		
-		this.speed = 0.5;
+		this.speed = speed;
 
 		sideCreature = new BufferedImage[2];
 		upCreature = new BufferedImage[2];
 		downCreature = new BufferedImage[2];
 
 		for(int i = 0; i < 2; i++) {
-			sideCreature[i] = Game.spritesheet.getSprite(64+(i*16), 32, 16, 16);
-			upCreature[i] = Game.spritesheet.getSprite(32+(i*16), 32, 16, 16);
-			downCreature[i] = Game.spritesheet.getSprite(0+(i*16), 32, 16, 16);
+			sideCreature[i] = Game.spritesheet.getSprite(xsprite+64+(i*16), ysprite, 16, 16);
+			upCreature[i] = Game.spritesheet.getSprite(xsprite+32+(i*16), ysprite, 16, 16);
+			downCreature[i] = Game.spritesheet.getSprite(xsprite+(i*16), ysprite, 16, 16);
 		}
 	}
 
@@ -123,7 +123,7 @@ public class Enemy extends Creature {
 			// Estamos colidindo com o player
 			if(!Game.player.isDamaged && !Game.player.isJumping) {
 				if (Game.rand.nextInt(100) < 10) {
-					Sound.hurtEffect.play();
+					Sounds.hurtEffect.play();	
 					Game.player.isDamaged = true;
 					Player.life--;
 				}
@@ -142,7 +142,7 @@ public class Enemy extends Creature {
 			// Colidindo com o Jogador
 			if(!Game.player.isDamaged && !Game.player.isJumping) {
 				if (Game.rand.nextInt(100) < 30) {
-					Sound.hurtEffect.play();
+					Sounds.hurtEffect.play();
 					Game.player.isDamaged = true;
 					Player.life--;
 				}
@@ -164,7 +164,7 @@ public class Enemy extends Creature {
 			
 			if (Entity.isColliding(this, e)) {
 				if (!isDamaged) {
-					Sound.hurtEffect.play();
+					Sounds.hurtEffect.play();
 					life -= e.damage;
 					this.isDamaged = true;
 				} 

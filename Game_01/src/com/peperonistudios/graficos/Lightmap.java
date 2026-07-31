@@ -24,7 +24,9 @@ public class Lightmap {
 		for (int xx = 0; xx < Game.WIDTH; xx++) {
 			for (int yy = 0; yy < Game.HEIGHT; yy++) {
 				if (lightmapPixels[xx + (yy * Game.WIDTH)] == 0xffffffff) {
-					Game.screenPixels[xx + (yy * Game.WIDTH)] = 0;
+					int pixel = Pixel.getLightBlend(Game.screenPixels[xx + yy * Game.WIDTH],
+						 0x282828, 0);
+					Game.screenPixels[xx + (yy * Game.WIDTH)] = pixel;
 				}
 			}
 		}
