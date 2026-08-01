@@ -82,9 +82,8 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public Menu menu;
 	public Cutscene cutscene;
 
+	// Menu, Normal, GameOver, Cutscene, Dialogue
 	public static String gameState = "Menu";
-	private static boolean showMessageGameOver = false;
-	private static int framesMessageGameOver = 0;
 	private static boolean restartGame = false;
 	
 	public Game() {
@@ -177,9 +176,18 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			menu.tick();
 		} else if (gameState == "Cutscene") {
 			cutscene.tick();
+		} else if (gameState == "Dialogue") {
+			ui.tick();
+
+			for (int i = 0; i < collectables.size(); i++) {
+				if (Creature.calculateDistance(Camera.x + WIDTH/2, Camera.y + HEIGHT/2,
+					collectables.get(i)) < SIMULATION_DISTANCE) {
+						collectables.get(i).tick();
+					}
+			}
+
 		} else if (gameState == "Normal") {
 			ui.tick();
-			restartGame = false;
 
 			// Rodando o tick apenas das entidades dentro da distância de simulação
 			for (int i = 0; i < entities.size(); i++) {
@@ -203,16 +211,10 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 				World.loadLevel(newWorld);
 			}
 		} else if (gameState == "GameOver") {
-			framesMessageGameOver++;
-
-			if (framesMessageGameOver == 25) {
-				framesMessageGameOver = 0;
-				if (showMessageGameOver) {
-					showMessageGameOver = false;
-				} else { showMessageGameOver = true; }
-			}
+			ui.tick();
 
 			if (restartGame) {
+				restartGame = false;
 				String newWorld = "level" + CURRENT_LEVEL + ".png";
 				World.restartGame(newWorld);
 				gameState = "Normal";
@@ -236,7 +238,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			g2d.dispose();
 			g2d = (Graphics2D) bs.getDrawGraphics();
 			g2d.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
-		} else {		
+		} else {
 			world.render(g2d);
 
 			Collections.sort(entities,Entity.entitySorter);
@@ -254,22 +256,11 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
 			ui.render(g2d);
 
-			if(Menu.pause) menu.render(g2d);
+			if(gameState == "Menu" && Menu.pause) menu.render(g2d);
 			
 			g2d.dispose();
 			g2d = (Graphics2D) bs.getDrawGraphics();
-			g2d.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);		
-
-			if (gameState == "GameOver") {
-				g2d.setColor(new Color(0,0,0,150));
-				g2d.fillRect(0, 0, WIDTH*SCALE, HEIGHT*SCALE);
-				g2d.setFont(new Font("arial", Font.BOLD, 28));
-				g2d.setColor(Color.WHITE);
-				g2d.drawString("GAME OVER!", 85*SCALE, 115*SCALE);
-				g2d.setFont(new Font("arial", Font.BOLD, 20));
-				if (showMessageGameOver)
-					g2d.drawString("> Pressione enter para reiniciar <", 48*SCALE, 127*SCALE);
-			}
+			g2d.drawImage(image, 0, 0, WIDTH*SCALE, HEIGHT*SCALE, null);
 		}
 		bs.show();
 	}
@@ -335,10 +326,6 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			if (gameState == "Menu") menu.down = true;
 			else player.down = true;
 		}
-		
-		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-			player.jumped = true;
-		}
 
 		if (playerAction) {
 			if (e.getKeyCode() == KeyEvent.VK_C) {
@@ -376,6 +363,10 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 			player.down = false;
 		}
 
+		if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+			if (gameState == "Normal") player.jumped = true;
+		}
+
 		if (e.getKeyCode() == KeyEvent.VK_C) {
 			playerAction = true;
 			player.isCasting = false;
@@ -388,8 +379,12 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 			if (gameState == "Normal") {
-				if (UI.showMessage) UI.showMessage = false;
-				else player.checkInteraction = true;
+				//if (UI.showMessage) UI.showMessage = false;
+				player.checkInteraction = true;
+			}
+			if (gameState == "Dialogue") {
+				gameState = "Normal";
+				UI.endDialogue();
 			}
 		}
 	}

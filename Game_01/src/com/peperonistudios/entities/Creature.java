@@ -35,7 +35,8 @@ public class Creature extends Entity{
 	protected int damageMode = 0;
 
 	public boolean isInteracting = false;
-
+    public String[] dialogue = new String[20];
+    public int dialogueIndex = 0;
 
     public Creature(int x, int y, int width, int height, int xsprite, int ysprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, null, 0, maskx, masky, maskw, maskh);
@@ -50,6 +51,10 @@ public class Creature extends Entity{
 			downCreature[i] = Game.spritesheet.getSprite(xsprite+(i*16), ysprite, 16, 16);
 		}
     }
+
+	public void setAction() {}
+	public void setDialogue() {}
+	public void speak() {}
 
 	public boolean isColliding (int xnext, int ynext) {
 		Rectangle enemyCurrent = new Rectangle(xnext + maskx, ynext + masky, maskw, maskh);
@@ -120,9 +125,9 @@ public class Creature extends Entity{
     
     public void render(Graphics2D g2d) {
 		// Hitbox
-        g2d.setColor(Color.BLUE);
+        /*g2d.setColor(Color.BLUE);
         g2d.fillRect(this.getX() + maskx - Camera.x, this.getY() + masky - Camera.y,
-                     maskw, maskh);
+                     maskw, maskh);*/
 
         g2d.drawImage(GROUND_SHADOW_EN, this.getX() - Camera.x, this.getY() - Camera.y + offsetShadow, null);
 

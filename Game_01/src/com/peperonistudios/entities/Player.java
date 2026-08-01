@@ -38,6 +38,8 @@ public class Player extends Creature {
 	public Player(int x, int y, int width, int height, int xsprite, int ysprite, int maskx, int masky, int maskw, int maskh) {
 		super(x, y, width, height, xsprite, ysprite, maskx, masky, maskw, maskh);
 
+		this.depth = 1;
+
 		knowSpell.add("basic");
 
 		this.offsetShadow = 2;
@@ -254,19 +256,23 @@ public class Player extends Creature {
 					if (atual.sprite == Entity.LIFE_ELIXIR_EN) {
 						life += 1;
 						if (life > max_life) life = max_life;
+						Sounds.healEffect.play();
 						Game.collectables.remove(i);
 						Game.entities.remove(atual);
 					} if (atual.sprite == Entity.BIGGER_LIFE_ELIXIR_EN) {
 						life = max_life;
+						Sounds.healEffect.play();
 						Game.collectables.remove(i);
 						Game.entities.remove(atual);
 					} if (atual.sprite == Entity.MANA_ELIXIR_EN) {
 						mana += 10;
 						if (mana > max_mana) mana = max_mana;
+						Sounds.healEffect.play();
 						Game.collectables.remove(i);
 						Game.entities.remove(atual);
 					} if (atual.sprite == Entity.BIGGER_MANA_ELIXIR_EN) {
 						mana = max_mana;
+						Sounds.healEffect.play();
 						Game.collectables.remove(i);
 						Game.entities.remove(atual);
 					}
@@ -277,12 +283,14 @@ public class Player extends Creature {
 			if (atual instanceof SpellBook) {
 				if (Entity.isColliding(this, atual)) {
 					if (atual.sprite == Entity.FIRE_BOOK_EN) {
+						Sounds.gotBook.play();
 						if (!gotFireBook) {
 							gotFireBook = true;
 							knowSpell.add("fire");
 							this.useSpell = knowSpell.indexOf("fire");
 						}
 					} if (atual.sprite == Entity.ICE_BOOK_EN) {
+						Sounds.gotBook.play();
 						if (!gotIceBook) {
 							gotIceBook = true;
 							knowSpell.add("ice");
@@ -300,12 +308,10 @@ public class Player extends Creature {
 		for (int i = 0; i < Game.npcs.size(); i++) {
 			Npc npcAtual = Game.npcs.get(i);
 			if ((calculateDistance(this, npcAtual) < 20)) {
-				npcAtual.wasInteracted = true;
-				isInteracting = true;
+				npcAtual.speak();
 				break;
 			}
 		}
-		checkInteraction = false;
 	}
 
 	protected void destroySelf () {

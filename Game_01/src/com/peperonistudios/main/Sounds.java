@@ -3,6 +3,8 @@ package com.peperonistudios.main;
 import java.io.*;
 import javax.sound.sampled.*;
 
+import com.peperonistudios.main.Sounds.Clips;
+
 public class Sounds {
     
     public static class Clips {
@@ -47,9 +49,16 @@ public class Sounds {
         }
     }
 
+    // Todos os soms q eu fiz tão baixos!
     public static final Clips musicBackground = load ("/Sounds/MainTheme.wav", 1);
     public static final Clips hurtEffect = load("/Sounds/hitHurt.wav", 1);
-    public static final Clips jumpEffect = load("/Sounds/isJumping.wav", 1);
+    public static final Clips jumpEffect = load("/Sounds/JumpingUp.wav", 1);
+    public static final Clips stairsEffect = load ("/Sounds/Stairs.wav", 1);
+    public static final Clips gotBook = load("/Sounds/BookCollected.wav", 1);
+    public static final Clips switchEffect = load("/Sounds/Click.wav", 1);
+    public static final Clips deathEffect = load ("/Sounds/Death.wav", 1);
+    public static final Clips doorEffect = load("/Sounds/DoorOpen.wav", 1);
+    public static final Clips healEffect = load("/Sounds/HealUp.wav", 1);
 
     private static Clips load (String name, int count) {
         try {

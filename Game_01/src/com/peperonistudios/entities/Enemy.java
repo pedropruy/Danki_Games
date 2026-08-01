@@ -176,6 +176,7 @@ public class Enemy extends Creature {
 	}
 
 	protected void destroySelf () {
+		Sounds.deathEffect.play();
 		Game.enemies.remove(this);
 		Game.entities.remove(this);
 	}
