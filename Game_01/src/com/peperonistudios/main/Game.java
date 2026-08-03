@@ -52,7 +52,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 	public static final int SCALE = 3;
 	// ERROR: a simulação deve estar de acordo com a camera e não a distância do player
 	public static final int SIMULATION_DISTANCE = 10*16;
-	public static int CURRENT_LEVEL = 1, MAX_LEVEL = 2;
+	public static int CURRENT_LEVEL = 1, MAX_LEVEL = 4;
 	
 	private BufferedImage image;
 	
@@ -70,7 +70,7 @@ public class Game extends Canvas implements Runnable, KeyListener, MouseListener
 
 	public static Random rand;
 
-	public UI ui;
+	public static UI ui;
 	public Sound sound;
 	public InputStream k_stream = ClassLoader.getSystemClassLoader().getResourceAsStream("KiwiSoda.ttf");
 	public static Font kiwi;

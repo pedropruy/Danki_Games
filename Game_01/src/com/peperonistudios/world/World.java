@@ -273,7 +273,12 @@ public class World {
 		Game.spritesheet = new Spritesheet("/spritesheet.png");
 		Game.entities.add(Game.player);
 		Game.world = new World("/" + level);
+		Game.ui.createMinimap();
         //Game.world = new World();
+	}
+
+    public static double calculateDistance (int x1, int y1, int x2, int y2) {
+		return Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));		
 	}
 
 	public void render(Graphics2D g2d) {
@@ -292,10 +297,13 @@ public class World {
 
 		for (int xx = xstart; xx <= xfinal; xx++) {
 			for (int yy = ystart; yy <= yfinal; yy++) {
-				if(xx < 0 || yy < 0 || xx >= WIDTH || yy >= HEIGHT)
+				if (xx < 0 || yy < 0 || xx >= WIDTH || yy >= HEIGHT)
 					continue;
-				Tile tile = tiles[xx + (yy*WIDTH)];
-				tile.render(g2d);
+                if (calculateDistance(Camera.x + Game.WIDTH/2, Camera.y + Game.HEIGHT/2,
+                    xx*16, yy*16) < Game.SIMULATION_DISTANCE + 32) {
+				    Tile tile = tiles[xx + (yy*WIDTH)];
+				    tile.render(g2d);
+                }
 			}
 		}
 	}
@@ -320,16 +328,26 @@ public class World {
             }
         }
 
-        int xPlayer = Game.player.getX() / 16;
-        int yPlayer = Game.player.getY() / 16;
+        int xPlayer = (Game.player.getX()+8) / 16;
+        int yPlayer = (Game.player.getY()+8) / 16;
         UI.minimapPixels[xPlayer + (yPlayer*WIDTH)] = 0xffffffff;
 
-        int xEnemy = 0;
-        int yEnemy = 0;
+        int xEnemy = 0, yEnemy = 0;
         for (int i = 0; i < Game.enemies.size(); i++) {
-            xEnemy = Game.enemies.get(i).getX() / 16;
-            yEnemy = Game.enemies.get(i).getY() / 16;
+            xEnemy = (Game.enemies.get(i).getX()+8) / 16;
+            yEnemy = (Game.enemies.get(i).getY()+8) / 16;
             UI.minimapPixels[xEnemy + (yEnemy*WIDTH)] = 0xffff0000;
+        }
+
+        int xCollect = 0, yCollect = 0;
+        for (int i = 0; i < Game.collectables.size(); i++) {
+            Collectable c = Game.collectables.get(i);
+            xCollect = (c.getX()+8) / 16;
+            yCollect = (c.getY()+8) / 16;
+            if (c instanceof SpellBook)
+                UI.minimapPixels[xCollect + (yCollect*WIDTH)] = 0xffff006E;
+            else
+                UI.minimapPixels[xCollect + (yCollect*WIDTH)] = 0xffffD800;
         }
         
     }

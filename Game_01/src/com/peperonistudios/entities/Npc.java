@@ -11,7 +11,7 @@ import com.peperonistudios.world.World;
 public class Npc extends Creature {
 
     public int movingDuration = 0, movingDurationMax = 60;
-    public int movedCooldown = 0, movedCooldownMax = 120;
+    public int movedCooldown = 110, movedCooldownMax = 120;
     public int movementDir = Game.rand.nextInt(4);
 
     public Npc(int x, int y, int width, int height, int xsprite, int ysprite, int maskx, int masky, int maskw,
@@ -106,53 +106,48 @@ public class Npc extends Creature {
 
     private void npcMovement_basic() {    
         if (moved) {
-            if (this.isCollidingWithPlayer() == false) {
-                if (movementDir == 0) {
-                    if (!World.isFreeCreature((int)(x+speed), this.getY(), 0))
-                        movingDuration = movingDurationMax;
-                    else if (isColliding((int)(x+speed), this.getY()))
-                        movingDuration = movingDurationMax;
-                    else {
-                        moved = true;
-                        dir = right_dir;
-                        x += speed;
-                    }
+            if (movementDir == 0) {
+                if (!World.isFreeCreature((int)(x+speed), this.getY(), 0))
+                    movingDuration = movingDurationMax;
+                else if (isColliding((int)(x+speed), this.getY()))
+                    movingDuration = movingDurationMax;
+                else {
+                    moved = true;
+                    dir = right_dir;
+                    x += speed;
                 }
-                else if (movementDir == 1) {
-                    if (!World.isFreeCreature((int)(x-speed), this.getY(), 0))
-                        movingDuration = movingDurationMax;
-                    else if (isColliding((int)(x-speed), this.getY()))
-                        movingDuration = movingDurationMax;
-                    else {
-                        moved = true;
-                        dir = left_dir;
-                        x -= speed;
-                    }
+            } else if (movementDir == 1) {
+                if (!World.isFreeCreature((int)(x-speed), this.getY(), 0))
+                    movingDuration = movingDurationMax;
+                else if (isColliding((int)(x-speed), this.getY()))
+                    movingDuration = movingDurationMax;
+                else {
+                    moved = true;
+                    dir = left_dir;
+                    x -= speed;
                 }
-                else if (movementDir == 2) {
-                    if (!World.isFreeCreature(this.getX(), (int)(y+speed), 0))
-                        movingDuration = movingDurationMax;
-                    else if (isColliding(this.getX(), (int)(y+speed)))
-                        movingDuration = movingDurationMax;
-                    else {
-                        moved = true;
-                        dir = down_dir;
-                        y += speed;
-                    }
+            } else if (movementDir == 2) {
+                if (!World.isFreeCreature(this.getX(), (int)(y+speed), 0))
+                    movingDuration = movingDurationMax;
+                else if (isColliding(this.getX(), (int)(y+speed)))
+                    movingDuration = movingDurationMax;
+                else {
+                    moved = true;
+                    dir = down_dir;
+                    y += speed;
                 }
-                else if (movementDir == 3) {
-                    if (!World.isFreeCreature(this.getX(), (int)(y-speed), 0))
-                        movingDuration = movingDurationMax;
-                    else if (isColliding(this.getX(), (int)(y-speed)))
-                        movingDuration = movingDurationMax; 
-                    else {
-                        moved = true;
-                        dir = up_dir;
-                        y -= speed;
-                    }
-                }	
+            } else if (movementDir == 3) {
+                if (!World.isFreeCreature(this.getX(), (int)(y-speed), 0))
+                    movingDuration = movingDurationMax;
+                else if (isColliding(this.getX(), (int)(y-speed)))
+                    movingDuration = movingDurationMax; 
+                else {
+                    moved = true;
+                    dir = up_dir;
+                    y -= speed;
+                }
             } else movingDuration = movingDurationMax;
-    
+            
             movingDuration++;
             if (movingDuration >= movingDurationMax) {
                 movingDuration = 0;

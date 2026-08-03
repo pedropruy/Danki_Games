@@ -176,7 +176,8 @@ public class UI {
         // Renderizando Minimapa
         if (showMinimap) {
             g2d.setColor(new Color(0, 0, 0, 175));
-            g2d.fillRect(Game.WIDTH - 40, 0, 40, 40);
+            g2d.fillRect(Game.WIDTH - minimap.getWidth() - 10, 0,
+                         minimap.getWidth() + 10, minimap.getHeight() + 10);
 
             World.renderMinimap();
             g2d.drawImage(minimap, Game.WIDTH - minimap.getWidth() - 5, 5, null);
